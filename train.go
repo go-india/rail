@@ -188,3 +188,28 @@ type RescheduledTrainsResp struct {
 	Trains []RescheduledTrain `json:"trains"`
 	Response
 }
+
+// TrainNameAutoCompleteReq parameters
+type TrainNameAutoCompleteReq struct {
+	// Specifies the Train name.
+	TrainName string `validate:"required"`
+}
+
+// Request encodes TrainNameAutoCompleteReq parameters returning a new http.Request
+func (r TrainNameAutoCompleteReq) Request() (*http.Request, error) {
+	err := validate.Struct(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid request")
+	}
+
+	urlStr := DefaultBaseURL + "/v2/suggest-train"
+	urlStr += fmt.Sprintf("/train/%s", r.TrainName)
+
+	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
+
+// Trains holds trains details
+type Trains struct {
+	Trains []Train `json:"trains"`
+	Response
+}

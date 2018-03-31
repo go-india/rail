@@ -90,3 +90,24 @@ func TestRescheduledTrains(t *testing.T) {
 		t.Fatal("invalid trains length")
 	}
 }
+
+func TestTrainNameAutoComplete(t *testing.T) {
+	c := &rail.Client{
+		Auth: rail.NewAuth(getAPIKey()),
+	}
+	testClient(c, t)
+
+	req := rail.TrainNameAutoCompleteReq{
+		TrainName: "duranto",
+	}
+
+	var resp rail.Trains
+	err := c.Do(c.Auth(req), &resp)
+	if err != nil {
+		t.Fatalf("client Do failed: %+v", err)
+	}
+
+	if len(resp.Trains) < 1 {
+		t.Fatal("invalid Trains length")
+	}
+}
