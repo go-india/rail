@@ -22,8 +22,15 @@ var (
 	updateTestData = flag.Bool("update", false, "if True run integration tests; if False run internal tests")
 )
 
+// returns APIKey from the environment
 func getAPIKey() string {
-	return "API_KEY"
+	env := func(key, defaultValue string) string {
+		if value := os.Getenv(key); value != "" {
+			return value
+		}
+		return defaultValue
+	}
+	return env("RAILWAYAPI_TEST_API_KEY", "API_KEY")
 }
 
 func TestMain(m *testing.M) {
