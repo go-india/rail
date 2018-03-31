@@ -8,6 +8,17 @@ import (
 	"github.com/pkg/errors"
 )
 
+type (
+	// WindowHour defines window time in hours to search.
+	WindowHour uint8
+)
+
+// Window Hours
+const (
+	WindowHour2 = 1 + iota
+	WindowHour4
+)
+
 // date return compatible date value
 func date(t time.Time) string { return t.Format("02-01-2006") }
 
@@ -174,6 +185,89 @@ type Station struct {
 	Code      string  `json:"code"`
 }
 
+// TrainWithTimings holds train timings
+type TrainWithTimings struct {
+	Train
+
+	DelayArrival   time.Time //`json:"delayarr"`
+	DelayDeparture time.Time //`json:"delaydep"`
+
+	ScheduledArrival   time.Time //`json:"scharr"`
+	ScheduledDeparture time.Time //`json:"schdep"`
+	ActualDeparture    time.Time //`json:"actdep"`
+	ActualArrival      time.Time //`json:"actarr"`
+}
+
+// UnmarshalJSON convert JSON data to struct
+func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
+	t := struct {
+		ScheduledArrival   string `json:"scharr"`
+		ScheduledDeparture string `json:"schdep"`
+		ActualDeparture    string `json:"actdep"`
+		ActualArrival      string `json:"actarr"`
+
+		DelayArrival   string `json:"delayarr"`
+		DelayDeparture string `json:"delaydep"`
+
+		Train
+	}{}
+	if err := json.Unmarshal(data, &t); err != nil {
+		return errors.Wrap(err, "UnmarshalJSON failed")
+	}
+
+	r.Train = t.Train
+
+	if len(t.ScheduledArrival) == 5 {
+		sa, err := time.Parse("15:04", t.ScheduledArrival)
+		if err != nil {
+			return errors.Wrap(err, "parse ScheduledArrival failed")
+		}
+		r.ScheduledArrival = sa
+	}
+
+	if len(t.ScheduledDeparture) == 5 {
+		sd, err := time.Parse("15:04", t.ScheduledDeparture)
+		if err != nil {
+			return errors.Wrap(err, "parse ScheduledDeparture failed")
+		}
+		r.ScheduledDeparture = sd
+	}
+
+	if len(t.ActualDeparture) == 5 {
+		ad, err := time.Parse("15:04", t.ActualDeparture)
+		if err != nil {
+			return errors.Wrap(err, "parse ActualDeparture failed")
+		}
+		r.ActualDeparture = ad
+	}
+
+	if len(t.ActualArrival) == 5 {
+		aa, err := time.Parse("15:04", t.ActualArrival)
+		if err != nil {
+			return errors.Wrap(err, "parse ActualArrival failed")
+		}
+		r.ActualArrival = aa
+	}
+
+	if len(t.DelayArrival) == 5 {
+		da, err := time.Parse("15:04", t.DelayArrival)
+		if err != nil {
+			return errors.Wrap(err, "parse DelayArrival failed")
+		}
+		r.DelayArrival = da
+	}
+
+	if len(t.DelayDeparture) == 5 {
+		dd, err := time.Parse("15:04", t.DelayDeparture)
+		if err != nil {
+			return errors.Wrap(err, "parse DelayDeparture failed")
+		}
+		r.DelayDeparture = dd
+	}
+
+	return nil
+}
+
 // Route holds route details
 type Route struct {
 	ActualArrivalDate    time.Time //`json:"actarr_date"`
@@ -215,22 +309,6 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 
 	*r = Route(t.Alias)
 
-	if t.ActualArrivalDate != "" {
-		aad, err := time.Parse("2 Jan 2006", t.ActualArrivalDate)
-		if err != nil {
-			return errors.Wrap(err, "parse ActualArrivalDate failed")
-		}
-		r.ActualArrivalDate = aad
-	}
-
-	if t.ScheduledArrivalDate != "" {
-		sad, err := time.Parse("2 Jan 2006", t.ScheduledArrivalDate)
-		if err != nil {
-			return errors.Wrap(err, "parse ScheduledArrivalDate failed")
-		}
-		r.ScheduledArrivalDate = sad
-	}
-
 	if len(t.ScheduledArrival) == 5 {
 		sa, err := time.Parse("15:04", t.ScheduledArrival)
 		if err != nil {
@@ -261,6 +339,22 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 			return errors.Wrap(err, "parse ActualArrival failed")
 		}
 		r.ActualArrival = aa
+	}
+
+	if t.ActualArrivalDate != "" {
+		aad, err := time.Parse("2 Jan 2006", t.ActualArrivalDate)
+		if err != nil {
+			return errors.Wrap(err, "parse ActualArrivalDate failed")
+		}
+		r.ActualArrivalDate = aad
+	}
+
+	if t.ScheduledArrivalDate != "" {
+		sad, err := time.Parse("2 Jan 2006", t.ScheduledArrivalDate)
+		if err != nil {
+			return errors.Wrap(err, "parse ScheduledArrivalDate failed")
+		}
+		r.ScheduledArrivalDate = sad
 	}
 
 	return nil

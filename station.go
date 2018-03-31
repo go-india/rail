@@ -43,3 +43,45 @@ type TrainBetweenStationsResp struct {
 
 	Response
 }
+
+// TrainArrivalsReq parameters
+type TrainArrivalsReq struct {
+	// Specifies the source station code.
+	Station string `validate:"required"`
+
+	// Specifies the windows hours to search.
+	//
+	// Window time in hours to search, valid values are 2 or 4.
+	Hours WindowHour `validate:"required"`
+}
+
+// Request encodes TrainArrivalsReq parameters returning a new http.Request
+func (r TrainArrivalsReq) Request() (*http.Request, error) {
+	err := validate.Struct(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid request")
+	}
+
+	var hours uint8
+	switch r.Hours {
+	case WindowHour2:
+		hours = 2
+	case WindowHour4:
+		hours = 4
+	default:
+		return nil, errors.New("invalid WindowHour")
+	}
+
+	urlStr := DefaultBaseURL + "/v2/arrivals"
+	urlStr += fmt.Sprintf("/station/%s/hours/%d", r.Station, hours)
+
+	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
+
+// TrainArrivalsResp holds train arrivals details
+type TrainArrivalsResp struct {
+	Trains []TrainWithTimings `json:"trains"`
+	Total  int                `json:"total"`
+
+	Response
+}
