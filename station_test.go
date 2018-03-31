@@ -93,3 +93,24 @@ func TestStationName(t *testing.T) {
 		t.Fatal("invalid Stations length")
 	}
 }
+
+func TestStationAutoComplete(t *testing.T) {
+	c := &rail.Client{
+		Auth: rail.NewAuth(getAPIKey()),
+	}
+	testClient(c, t)
+
+	req := rail.StationAutoCompleteReq{
+		StationName: "bareilly",
+	}
+
+	var resp rail.Stations
+	err := c.Do(c.Auth(req), &resp)
+	if err != nil {
+		t.Fatalf("client Do failed: %+v", err)
+	}
+
+	if len(resp.Stations) < 1 {
+		t.Fatal("invalid Stations length")
+	}
+}

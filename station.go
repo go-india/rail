@@ -129,3 +129,22 @@ func (r StationNameReq) Request() (*http.Request, error) {
 
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
+
+// StationAutoCompleteReq parameters
+type StationAutoCompleteReq struct {
+	// Specifies the source station name.
+	StationName string `validate:"required"`
+}
+
+// Request encodes StationAutoCompleteReq parameters returning a new http.Request
+func (r StationAutoCompleteReq) Request() (*http.Request, error) {
+	err := validate.Struct(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid request")
+	}
+
+	urlStr := DefaultBaseURL + "/v2/suggest-station"
+	urlStr += fmt.Sprintf("/name/%s", r.StationName)
+
+	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
