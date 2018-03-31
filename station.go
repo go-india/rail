@@ -105,8 +105,27 @@ func (r StationCodeReq) Request() (*http.Request, error) {
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
 
-// StationCodeResp holds stations
-type StationCodeResp struct {
+// Stations holds stations
+type Stations struct {
 	Stations []Station `json:"stations"`
 	Response
+}
+
+// StationNameReq parameters
+type StationNameReq struct {
+	// Specifies the source station code.
+	StationCode string `validate:"required"`
+}
+
+// Request encodes StationNameReq parameters returning a new http.Request
+func (r StationNameReq) Request() (*http.Request, error) {
+	err := validate.Struct(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid request")
+	}
+
+	urlStr := DefaultBaseURL + "/v2/code-to-name"
+	urlStr += fmt.Sprintf("/code/%s", r.StationCode)
+
+	return http.NewRequest(http.MethodGet, urlStr, nil)
 }

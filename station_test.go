@@ -62,7 +62,28 @@ func TestStationCode(t *testing.T) {
 		StationName: "bareilly",
 	}
 
-	var resp rail.StationCodeResp
+	var resp rail.Stations
+	err := c.Do(c.Auth(req), &resp)
+	if err != nil {
+		t.Fatalf("client Do failed: %+v", err)
+	}
+
+	if len(resp.Stations) < 1 {
+		t.Fatal("invalid Stations length")
+	}
+}
+
+func TestStationName(t *testing.T) {
+	c := &rail.Client{
+		Auth: rail.NewAuth(getAPIKey()),
+	}
+	testClient(c, t)
+
+	req := rail.StationNameReq{
+		StationCode: "BE",
+	}
+
+	var resp rail.Stations
 	err := c.Do(c.Auth(req), &resp)
 	if err != nil {
 		t.Fatalf("client Do failed: %+v", err)
