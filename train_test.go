@@ -111,3 +111,24 @@ func TestTrainNameAutoComplete(t *testing.T) {
 		t.Fatal("invalid Trains length")
 	}
 }
+
+func TestTrainCodeAutoComplete(t *testing.T) {
+	c := &rail.Client{
+		Auth: rail.NewAuth(getAPIKey()),
+	}
+	testClient(c, t)
+
+	req := rail.TrainCodeAutoCompleteReq{
+		TrainCode: 14311,
+	}
+
+	var resp rail.Trains
+	err := c.Do(c.Auth(req), &resp)
+	if err != nil {
+		t.Fatalf("client Do failed: %+v", err)
+	}
+
+	if len(resp.Trains) < 1 {
+		t.Fatal("invalid Trains length")
+	}
+}

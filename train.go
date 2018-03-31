@@ -213,3 +213,22 @@ type Trains struct {
 	Trains []Train `json:"trains"`
 	Response
 }
+
+// TrainCodeAutoCompleteReq parameters
+type TrainCodeAutoCompleteReq struct {
+	// Specifies the Train code.
+	TrainCode int `validate:"required"`
+}
+
+// Request encodes TrainCodeAutoCompleteReq parameters returning a new http.Request
+func (r TrainCodeAutoCompleteReq) Request() (*http.Request, error) {
+	err := validate.Struct(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "invalid request")
+	}
+
+	urlStr := DefaultBaseURL + "/v2/suggest-train"
+	urlStr += fmt.Sprintf("/train/%d", r.TrainCode)
+
+	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
