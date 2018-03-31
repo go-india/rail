@@ -69,3 +69,24 @@ func TestCancelledTrains(t *testing.T) {
 		t.Fatal("invalid trains length")
 	}
 }
+
+func TestRescheduledTrains(t *testing.T) {
+	c := &rail.Client{
+		Auth: rail.NewAuth(getAPIKey()),
+	}
+	testClient(c, t)
+
+	req := rail.RescheduledTrainsReq{
+		Date: time.Now(),
+	}
+
+	var resp rail.RescheduledTrainsResp
+	err := c.Do(c.Auth(req), &resp)
+	if err != nil {
+		t.Fatalf("client Do failed: %+v", err)
+	}
+
+	if len(resp.Trains) < 1 {
+		t.Fatal("invalid trains length")
+	}
+}
