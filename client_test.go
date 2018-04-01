@@ -56,6 +56,13 @@ func TestClientDo(t *testing.T) {
 				func() (*http.Request, error) { return req, nil },
 			),
 			inputIntoPtr: temp,
+			setup:        func() { c.UserAgent = rail.DefaultUserAgent },
+		},
+		{
+			inputRequester: mockRequester(
+				func() (*http.Request, error) { return req, nil },
+			),
+			inputIntoPtr: temp,
 			expected:     "HTTP request failed",
 
 			setup: func() { c.BaseURL = url },

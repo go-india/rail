@@ -20,6 +20,8 @@ import (
 const (
 	// DefaultBaseURL is the default base server URL.
 	DefaultBaseURL = "https://api.railwayapi.com"
+	// DefaultUserAgent is the default user agent used by client.
+	DefaultUserAgent = "go-india/rail"
 )
 
 // use a single instance of Validate, it caches struct info
@@ -46,6 +48,9 @@ func (f RequesterFunc) Request() (*http.Request, error) {
 type Client struct {
 	// BaseURL is the base URL of the api server
 	BaseURL *url.URL
+	// User agent used when communicating with the GitHub API.
+	UserAgent string
+
 	// HTTPClient is a reusable http client instance
 	HTTPClient *http.Client
 	// Auth holds an authenticator function
@@ -73,6 +78,10 @@ func (c Client) Do(r Requester, intoPtr interface{}) error {
 	if c.BaseURL != nil {
 		req.URL.Scheme = c.BaseURL.Scheme
 		req.URL.Host = c.BaseURL.Host
+	}
+
+	if c.UserAgent != "" {
+		req.Header.Set("User-Agent", c.UserAgent)
 	}
 
 	rsp, err := client.Do(req)
