@@ -40,13 +40,13 @@ func (r TrainBetweenStationsReq) Request() (*http.Request, error) {
 
 // ExtendedTrain holds extended train details
 type ExtendedTrain struct {
-	Train
+	*Train
 
-	StationTo          Station       `json:"to_station"`
-	StationFrom        Station       `json:"from_station"`
-	SourceDeparture    time.Time     // `json:"src_departure_time"`
-	DestinationArrival time.Time     // `json:"dest_arrival_time"`
-	TravelDuration     time.Duration // `json:"travel_time"`
+	StationTo          *Station       `json:"to_station,omitempty"`
+	StationFrom        *Station       `json:"from_station,omitempty"`
+	SourceDeparture    *time.Time     // `json:"src_departure_time,omitempty"`
+	DestinationArrival *time.Time     // `json:"dest_arrival_time,omitempty"`
+	TravelDuration     *time.Duration // `json:"travel_time,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -69,7 +69,7 @@ func (et *ExtendedTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse SourceDepartureTime failed")
 		}
-		et.SourceDeparture = sdt
+		et.SourceDeparture = &sdt
 	}
 
 	if len(t.DestinationArrivalTime) == 5 {
@@ -77,7 +77,7 @@ func (et *ExtendedTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse DestinationArrivalTime failed")
 		}
-		et.DestinationArrival = dat
+		et.DestinationArrival = &dat
 	}
 
 	if len(t.TravelTime) == 5 {
@@ -86,7 +86,7 @@ func (et *ExtendedTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse travelTime failed")
 		}
-		et.TravelDuration = dur
+		et.TravelDuration = &dur
 	}
 
 	return nil
@@ -94,10 +94,10 @@ func (et *ExtendedTrain) UnmarshalJSON(data []byte) error {
 
 // TrainBetweenStationsResp holds trains between stations
 type TrainBetweenStationsResp struct {
-	Trains []ExtendedTrain `json:"trains"`
-	Total  int             `json:"total"`
+	Trains []ExtendedTrain `json:"trains,omitempty"`
+	Total  *int            `json:"total,omitempty"`
 
-	Response
+	*Response
 }
 
 // TrainArrivalsReq parameters
@@ -136,15 +136,15 @@ func (r TrainArrivalsReq) Request() (*http.Request, error) {
 
 // TrainWithTimings holds train timings
 type TrainWithTimings struct {
-	Train
+	*Train
 
-	DelayArrival   time.Time //`json:"delayarr"`
-	DelayDeparture time.Time //`json:"delaydep"`
+	DelayArrival   *time.Time //`json:"delayarr,omitempty"`
+	DelayDeparture *time.Time //`json:"delaydep,omitempty"`
 
-	ScheduledArrival   time.Time //`json:"scharr"`
-	ScheduledDeparture time.Time //`json:"schdep"`
-	ActualDeparture    time.Time //`json:"actdep"`
-	ActualArrival      time.Time //`json:"actarr"`
+	ScheduledArrival   *time.Time //`json:"scharr,omitempty"`
+	ScheduledDeparture *time.Time //`json:"schdep,omitempty"`
+	ActualDeparture    *time.Time //`json:"actdep,omitempty"`
+	ActualArrival      *time.Time //`json:"actarr,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -158,7 +158,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		DelayArrival   string `json:"delayarr"`
 		DelayDeparture string `json:"delaydep"`
 
-		Train
+		*Train
 	}{}
 	if err := json.Unmarshal(data, &t); err != nil {
 		return errors.Wrap(err, "UnmarshalJSON failed")
@@ -171,7 +171,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledArrival failed")
 		}
-		r.ScheduledArrival = sa
+		r.ScheduledArrival = &sa
 	}
 
 	if len(t.ScheduledDeparture) == 5 {
@@ -179,7 +179,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledDeparture failed")
 		}
-		r.ScheduledDeparture = sd
+		r.ScheduledDeparture = &sd
 	}
 
 	if len(t.ActualDeparture) == 5 {
@@ -187,7 +187,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ActualDeparture failed")
 		}
-		r.ActualDeparture = ad
+		r.ActualDeparture = &ad
 	}
 
 	if len(t.ActualArrival) == 5 {
@@ -195,7 +195,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ActualArrival failed")
 		}
-		r.ActualArrival = aa
+		r.ActualArrival = &aa
 	}
 
 	if len(t.DelayArrival) == 5 {
@@ -203,7 +203,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse DelayArrival failed")
 		}
-		r.DelayArrival = da
+		r.DelayArrival = &da
 	}
 
 	if len(t.DelayDeparture) == 5 {
@@ -211,7 +211,7 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse DelayDeparture failed")
 		}
-		r.DelayDeparture = dd
+		r.DelayDeparture = &dd
 	}
 
 	return nil
@@ -219,10 +219,10 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 
 // TrainArrivalsResp holds train arrivals details
 type TrainArrivalsResp struct {
-	Trains []TrainWithTimings `json:"trains"`
-	Total  int                `json:"total"`
+	Trains []TrainWithTimings `json:"trains,omitempty"`
+	Total  *int               `json:"total,omitempty"`
 
-	Response
+	*Response
 }
 
 // StationCodeReq parameters

@@ -58,8 +58,8 @@ func (a *Available) UnmarshalJSON(data []byte) error {
 
 // Day holds day details
 type Day struct {
-	Runs bool   // `json:"runs"`
-	Code string `json:"code"`
+	Runs bool   // `json:"runs,omitempty"`
+	Code string `json:"code,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -86,9 +86,9 @@ type Quota struct {
 
 // Class holds class details
 type Class struct {
-	Available bool   // `json:"available"`
+	Available *bool  // `json:"available,omitempty"`
 	Name      string `json:"name,omitempty"`
-	Code      string `json:"code"`
+	Code      string `json:"code,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -103,23 +103,25 @@ func (c *Class) UnmarshalJSON(data []byte) error {
 	}
 
 	*c = Class(t.Alias)
-	c.Available = t.Avail == "Y"
+
+	b := t.Avail == "Y"
+	c.Available = &b
 	return nil
 }
 
 // Train holds train details
 type Train struct {
 	Name    string  `json:"name"`
-	Number  int     `json:"number,string"`
-	Classes []Class `json:"classes"`
-	Days    []Day   `json:"days"`
+	Number  uint32  `json:"number,string"`
+	Classes []Class `json:"classes,omitempty"`
+	Days    []Day   `json:"days,omitempty"`
 }
 
 // Passenger holds passenger details
 type Passenger struct {
-	Number        int    `json:"no"`
-	CurrentStatus string `json:"current_status"`
-	BookingStatus string `json:"booking_status"`
+	Number        *uint16 `json:"no,omitempty"`
+	CurrentStatus *string `json:"current_status,omitempty"`
+	BookingStatus *string `json:"booking_status,omitempty"`
 }
 
 // Station holds station details
@@ -132,24 +134,24 @@ type Station struct {
 
 // Route holds route details
 type Route struct {
-	ActualArrivalDate    time.Time //`json:"actarr_date"`
-	ScheduledArrivalDate time.Time //`json:"scharr_date"`
+	ActualArrivalDate    *time.Time //`json:"actarr_date,omitempty"`
+	ScheduledArrivalDate *time.Time //`json:"scharr_date,omitempty"`
 
-	ScheduledArrival   time.Time //`json:"scharr"`
-	ScheduledDeparture time.Time //`json:"schdep"`
-	ActualDeparture    time.Time //`json:"actdep"`
-	ActualArrival      time.Time //`json:"actarr"`
+	ScheduledArrival   *time.Time //`json:"scharr,omitempty"`
+	ScheduledDeparture *time.Time //`json:"schdep,omitempty"`
+	ActualDeparture    *time.Time //`json:"actdep,omitempty"`
+	ActualArrival      *time.Time //`json:"actarr,omitempty"`
 
-	HasArrived  bool `json:"has_arrived"`
-	HasDeparted bool `json:"has_departed"`
+	HasArrived  *bool `json:"has_arrived,omitempty"`
+	HasDeparted *bool `json:"has_departed,omitempty"`
 
-	Station       Station `json:"station"`
-	Status        string  `json:"status"`
-	LateByMinutes int     `json:"latemin"`
-	Distance      float64 `json:"distance"`
-	Day           int     `json:"day"`
-	Number        int     `json:"no,omitempty"`
-	Halt          int     `json:"halt,omitempty"`
+	Station       *Station `json:"station,omitempty"`
+	Status        *string  `json:"status,omitempty"`
+	LateByMinutes *int     `json:"latemin,omitempty"`
+	Distance      *float64 `json:"distance,omitempty"`
+	Day           *int     `json:"day,omitempty"`
+	Number        *int     `json:"no,omitempty"`
+	Halt          *int     `json:"halt,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -176,7 +178,7 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledArrival failed")
 		}
-		r.ScheduledArrival = sa
+		r.ScheduledArrival = &sa
 	}
 
 	if len(t.ScheduledDeparture) == 5 {
@@ -184,7 +186,7 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledDeparture failed")
 		}
-		r.ScheduledDeparture = sd
+		r.ScheduledDeparture = &sd
 	}
 
 	if len(t.ActualDeparture) == 5 {
@@ -192,7 +194,7 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ActualDeparture failed")
 		}
-		r.ActualDeparture = ad
+		r.ActualDeparture = &ad
 	}
 
 	if len(t.ActualArrival) == 5 {
@@ -200,7 +202,7 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ActualArrival failed")
 		}
-		r.ActualArrival = aa
+		r.ActualArrival = &aa
 	}
 
 	if t.ActualArrivalDate != "" {
@@ -208,7 +210,7 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ActualArrivalDate failed")
 		}
-		r.ActualArrivalDate = aad
+		r.ActualArrivalDate = &aad
 	}
 
 	if t.ScheduledArrivalDate != "" {
@@ -216,7 +218,7 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledArrivalDate failed")
 		}
-		r.ScheduledArrivalDate = sad
+		r.ScheduledArrivalDate = &sad
 	}
 
 	return nil

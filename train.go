@@ -12,7 +12,7 @@ import (
 
 // TrainByNumberReq parameters
 type TrainByNumberReq struct {
-	TrainNumber int `validate:"required"` // Specifies the train number.
+	TrainNumber uint32 `validate:"required"` // Specifies the train number.
 }
 
 // Request encodes TrainByNumberReq parameters returning a new http.Request
@@ -30,8 +30,8 @@ func (r TrainByNumberReq) Request() (*http.Request, error) {
 
 // TrainResp holds train details
 type TrainResp struct {
-	Train Train `json:"train"`
-	Response
+	Train *Train `json:"train,omitempty"`
+	*Response
 }
 
 // TrainByNameReq parameters
@@ -73,12 +73,12 @@ func (r CancelledTrainsReq) Request() (*http.Request, error) {
 
 // TrainSemi holds semi train information
 type TrainSemi struct {
-	Source      Station   `json:"source"`
-	Destination Station   `json:"dest"`
-	Type        string    `json:"type"`
-	StartDate   time.Time `json:"start_time"`
+	Source      *Station   `json:"source,omitempty"`
+	Destination *Station   `json:"dest,omitempty"`
+	Type        *string    `json:"type,omitempty"`
+	StartDate   *time.Time //`json:"start_time,omitempty"`
 
-	Train
+	*Train
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -91,23 +91,25 @@ func (s *TrainSemi) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &t); err != nil {
 		return errors.Wrap(err, "UnmarshalJSON failed")
 	}
+	*s = TrainSemi(t.Alias)
 
-	start, err := time.Parse("2 Jan 2006", t.Start)
-	if err != nil {
-		return errors.Wrap(err, "parse StartTime failed")
+	if t.Start != "" {
+		start, err := time.Parse("2 Jan 2006", t.Start)
+		if err != nil {
+			return errors.Wrap(err, "parse StartDate failed")
+		}
+		s.StartDate = &start
 	}
 
-	*s = TrainSemi(t.Alias)
-	s.StartDate = start
 	return nil
 }
 
 // CancelledTrainsResp holds cancelled trains details
 type CancelledTrainsResp struct {
-	Trains []TrainSemi `json:"trains"`
-	Total  int         `json:"total"`
+	Trains []TrainSemi `json:"trains,omitempty"`
+	Total  *int        `json:"total,omitempty"`
 
-	Response
+	*Response
 }
 
 // RescheduledTrainsReq parameters
@@ -131,14 +133,14 @@ func (r RescheduledTrainsReq) Request() (*http.Request, error) {
 
 // RescheduledTrain holds rescheduled train detail
 type RescheduledTrain struct {
-	StationFrom Station `json:"from_station"`
-	StationTo   Station `json:"to_station"`
+	StationFrom *Station `json:"from_station,omitempty"`
+	StationTo   *Station `json:"to_station,omitempty"`
 
-	TimeDifference  time.Duration // `json:"time_diff"`
-	RescheduledDate time.Time     // `json:"rescheduled_date"`
-	RescheduledTime time.Time     // `json:"rescheduled_time"`
+	TimeDifference  *time.Duration // `json:"time_diff,omitempty"`
+	RescheduledDate *time.Time     // `json:"rescheduled_date,omitempty"`
+	RescheduledTime *time.Time     // `json:"rescheduled_time,omitempty"`
 
-	Train
+	*Train
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -161,7 +163,7 @@ func (s *RescheduledTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse RescheduledDate failed")
 		}
-		s.RescheduledDate = rd
+		s.RescheduledDate = &rd
 	}
 
 	if len(t.RescheduledTime) == 5 {
@@ -169,7 +171,7 @@ func (s *RescheduledTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse RescheduledTime failed")
 		}
-		s.RescheduledTime = rt
+		s.RescheduledTime = &rt
 	}
 
 	if len(t.TimeDifference) == 5 {
@@ -178,15 +180,15 @@ func (s *RescheduledTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse TimeDifference failed")
 		}
-		s.TimeDifference = dur
+		s.TimeDifference = &dur
 	}
 	return nil
 }
 
 // RescheduledTrainsResp holds rescheduled trains
 type RescheduledTrainsResp struct {
-	Trains []RescheduledTrain `json:"trains"`
-	Response
+	Trains []RescheduledTrain `json:"trains,omitempty"`
+	*Response
 }
 
 // TrainNameAutoCompleteReq parameters
@@ -210,14 +212,14 @@ func (r TrainNameAutoCompleteReq) Request() (*http.Request, error) {
 
 // Trains holds trains details
 type Trains struct {
-	Trains []Train `json:"trains"`
-	Response
+	Trains []Train `json:"trains,omitempty"`
+	*Response
 }
 
 // TrainCodeAutoCompleteReq parameters
 type TrainCodeAutoCompleteReq struct {
 	// Specifies the Train code.
-	TrainCode int `validate:"required"`
+	TrainCode uint32 `validate:"required"`
 }
 
 // Request encodes TrainCodeAutoCompleteReq parameters returning a new http.Request
