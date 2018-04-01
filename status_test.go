@@ -1,125 +1,83 @@
 package rail_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/go-india/rail"
 )
 
-func TestLiveStatus(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestLiveTrainStatus(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.LiveStatusReq{
-		Date:        time.Now(),
-		TrainNumber: 14311,
-	}
-
-	var resp rail.LiveStatusResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.LiveTrainStatus(context.Background(), 14311, time.Now())
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("LiveTrainStatus failed:", err)
 	}
 
-	if len(resp.Route) < 1 {
-		t.Fatal("invalid routes length")
+	if len(resp.Route) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestRoute(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestTrainRoute(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.RouteReq{
-		TrainNumber: 14311,
-	}
-
-	var resp rail.RouteResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.TrainRoute(context.Background(), 14311)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("TrainRoute failed:", err)
 	}
 
-	if len(resp.Route) < 1 {
-		t.Fatal("invalid routes length")
+	if len(resp.Route) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
 func TestCheckSeat(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.CheckSeatReq{
-		TrainNumber:     14311,
-		FromStationCode: "BE",
-		ToStationCode:   "ADI",
-		Class:           "SL",
-		Quota:           "GN",
-		Date:            time.Date(2018, time.April, 05, 0, 0, 0, 0, time.UTC),
-	}
+	d := time.Date(2018, time.April, 5, 0, 0, 0, 0, time.UTC)
 
-	var resp rail.CheckSeatResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.CheckSeat(context.Background(), 14311, "BE", "ADI", "SL", "GN", d)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("CheckSeat failed:", err)
 	}
 
-	if len(resp.Availability) < 1 {
-		t.Fatalf("invalid Availability length")
+	if len(resp.Availability) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestPNR(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestPNRStatus(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.PNRReq{
-		PNRNumber: 2144287856,
-	}
-
-	var resp rail.PNRResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.PNRStatus(context.Background(), 2144287856)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("PNRStatus failed:", err)
 	}
 
-	if len(resp.Passengers) < 1 {
-		t.Fatal("invalid Passengers length")
+	if len(resp.Passengers) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestFare(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestTrainFare(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.FareReq{
-		TrainNumber:     14311,
-		FromStationCode: "BE",
-		ToStationCode:   "ADI",
-		Age:             24,
-		Class:           "SL",
-		Quota:           "GN",
-		Date:            time.Date(2018, time.April, 05, 0, 0, 0, 0, time.UTC),
-	}
+	d := time.Date(2018, time.April, 5, 0, 0, 0, 0, time.UTC)
 
-	var resp rail.FareResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.TrainFare(context.Background(), 14311, "BE", "ADI", 24, "SL", "GN", d)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("TrainFare failed:", err)
 	}
 
-	if resp.ResponseCode != 200 {
-		t.Fatalf("invalid ResponseCode")
+	if len(resp.Train.Classes) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }

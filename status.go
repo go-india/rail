@@ -1,6 +1,7 @@
 package rail
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,16 +10,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-// LiveStatusReq parameters
-type LiveStatusReq struct {
+// LiveTrainStatusReq parameters
+type LiveTrainStatusReq struct {
 	// Specifies the train number.
 	TrainNumber uint32 `validate:"required"`
 	// Specifies the date for which result is required.
 	Date time.Time `validate:"required"`
 }
 
-// Request encodes LiveStatusReq parameters returning a new http.Request
-func (r LiveStatusReq) Request() (*http.Request, error) {
+// Request encodes LiveTrainStatusReq parameters returning a new http.Request
+func (r LiveTrainStatusReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -35,8 +36,8 @@ func (r LiveStatusReq) Request() (*http.Request, error) {
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
 
-// LiveStatusResp of the request
-type LiveStatusResp struct {
+// LiveTrainStatusResp of the request
+type LiveTrainStatusResp struct {
 	Train          *Train     `json:"train,omitempty"`
 	CurrentStation *Station   `json:"current_station,omitempty"`
 	Route          []Route    `json:"route,omitempty"`
@@ -47,8 +48,8 @@ type LiveStatusResp struct {
 }
 
 // UnmarshalJSON convert JSON data to struct
-func (s *LiveStatusResp) UnmarshalJSON(data []byte) error {
-	type Alias LiveStatusResp
+func (s *LiveTrainStatusResp) UnmarshalJSON(data []byte) error {
+	type Alias LiveTrainStatusResp
 	t := struct {
 		Alias
 		Start string `json:"start_date"`
@@ -56,7 +57,7 @@ func (s *LiveStatusResp) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &t); err != nil {
 		return errors.Wrap(err, "UnmarshalJSON failed")
 	}
-	*s = LiveStatusResp(t.Alias)
+	*s = LiveTrainStatusResp(t.Alias)
 
 	if t.Start != "" {
 		start, err := time.Parse("2 Jan 2006", t.Start)
@@ -69,13 +70,30 @@ func (s *LiveStatusResp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// RouteReq parameters
-type RouteReq struct {
+// LiveTrainStatus gets live running status of a Train.
+func (c Client) LiveTrainStatus(ctx context.Context,
+	number uint32,
+	date time.Time,
+) (LiveTrainStatusResp, error) {
+	if c.Auth == nil {
+		return LiveTrainStatusResp{}, ErrNoAuth
+	}
+
+	var r LiveTrainStatusResp
+	err := c.Do(c.Auth(WithCtx(ctx, LiveTrainStatusReq{
+		TrainNumber: number,
+		Date:        date,
+	})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// TrainRouteReq parameters
+type TrainRouteReq struct {
 	TrainNumber uint32 `validate:"required"` // Specifies the train number.
 }
 
-// Request encodes RouteReq parameters returning a new http.Request
-func (r RouteReq) Request() (*http.Request, error) {
+// Request encodes TrainRouteReq parameters returning a new http.Request
+func (r TrainRouteReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -87,12 +105,23 @@ func (r RouteReq) Request() (*http.Request, error) {
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
 
-// RouteResp holds route information of a train
-type RouteResp struct {
+// TrainRouteResp holds route information of a train
+type TrainRouteResp struct {
 	Train *Train  `json:"train,omitempty"`
 	Route []Route `json:"route,omitempty"`
 
 	*Response
+}
+
+// TrainRoute gets details about all the stations in the train’s route.
+func (c Client) TrainRoute(ctx context.Context, number uint32) (TrainRouteResp, error) {
+	if c.Auth == nil {
+		return TrainRouteResp{}, ErrNoAuth
+	}
+
+	var r TrainRouteResp
+	err := c.Do(c.Auth(WithCtx(ctx, TrainRouteReq{number})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }
 
 // CheckSeatReq parameters
@@ -144,13 +173,38 @@ type CheckSeatResp struct {
 	*Response
 }
 
-// PNRReq parameters
-type PNRReq struct {
+// CheckSeat gets train seat availability.
+func (c Client) CheckSeat(ctx context.Context,
+	TrainNumber uint32,
+	FromStationCode string,
+	ToStationCode string,
+	Class string,
+	Quota string,
+	Date time.Time,
+) (CheckSeatResp, error) {
+	if c.Auth == nil {
+		return CheckSeatResp{}, ErrNoAuth
+	}
+
+	var r CheckSeatResp
+	err := c.Do(c.Auth(WithCtx(ctx, CheckSeatReq{
+		TrainNumber:     TrainNumber,
+		FromStationCode: FromStationCode,
+		ToStationCode:   ToStationCode,
+		Class:           Class,
+		Quota:           Quota,
+		Date:            Date,
+	})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// PNRStatusReq parameters
+type PNRStatusReq struct {
 	PNRNumber uint64 `validate:"required"` // Specifies the pnr number.
 }
 
-// Request encodes PNRReq parameters returning a new http.Request
-func (r PNRReq) Request() (*http.Request, error) {
+// Request encodes PNRStatusReq parameters returning a new http.Request
+func (r PNRStatusReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -162,8 +216,8 @@ func (r PNRReq) Request() (*http.Request, error) {
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
 
-// PNRResp is the response for a PNRReq
-type PNRResp struct {
+// PNRStatusResp is the response for a PNRReq
+type PNRStatusResp struct {
 	ChartPrepared   *bool       `json:"chart_prepared,omitempty"`
 	DateOfJourney   *time.Time  // `json:"doj,omitempty"`
 	BoardingPoint   *Station    `json:"boarding_point,omitempty"`
@@ -180,8 +234,8 @@ type PNRResp struct {
 }
 
 // UnmarshalJSON convert JSON data to struct
-func (p *PNRResp) UnmarshalJSON(data []byte) error {
-	type Alias PNRResp
+func (p *PNRStatusResp) UnmarshalJSON(data []byte) error {
+	type Alias PNRStatusResp
 	t := struct {
 		Alias
 		DOJ string `json:"doj"`
@@ -189,7 +243,7 @@ func (p *PNRResp) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &t); err != nil {
 		return errors.Wrap(err, "UnmarshalJSON failed")
 	}
-	*p = PNRResp(t.Alias)
+	*p = PNRStatusResp(t.Alias)
 
 	if t.DOJ != "" {
 		doj, err := time.Parse("02-01-2006", t.DOJ)
@@ -202,8 +256,19 @@ func (p *PNRResp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// FareReq parameters
-type FareReq struct {
+// PNRStatus gets PNR status details.
+func (c Client) PNRStatus(ctx context.Context, number uint64) (PNRStatusResp, error) {
+	if c.Auth == nil {
+		return PNRStatusResp{}, ErrNoAuth
+	}
+
+	var r PNRStatusResp
+	err := c.Do(c.Auth(WithCtx(ctx, PNRStatusReq{number})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// TrainFareReq parameters
+type TrainFareReq struct {
 	// Specifies the train number.
 	TrainNumber uint32 `validate:"required"`
 	// Specifies the source station code.
@@ -220,8 +285,8 @@ type FareReq struct {
 	Quota string `validate:"required"`
 }
 
-// Request encodes FareReq parameters returning a new http.Request
-func (r FareReq) Request() (*http.Request, error) {
+// Request encodes TrainFareReq parameters returning a new http.Request
+func (r TrainFareReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -242,8 +307,8 @@ func (r FareReq) Request() (*http.Request, error) {
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
 
-// FareResp holds fare details for a train journey
-type FareResp struct {
+// TrainFareResp holds fare details for a train journey
+type TrainFareResp struct {
 	FromStation  *Station    `json:"from_station,omitempty"`
 	ToStation    *Station    `json:"to_station,omitempty"`
 	Quota        *Quota      `json:"quota,omitempty"`
@@ -253,4 +318,31 @@ type FareResp struct {
 	Availability []Available `json:"availability,omitempty"`
 
 	*Response
+}
+
+// TrainFare gets fares of a train.
+func (c Client) TrainFare(ctx context.Context,
+	TrainNumber uint32,
+	FromStationCode string,
+	ToStationCode string,
+	Age uint8,
+	Class string,
+	Quota string,
+	Date time.Time,
+) (TrainFareResp, error) {
+	if c.Auth == nil {
+		return TrainFareResp{}, ErrNoAuth
+	}
+
+	var r TrainFareResp
+	err := c.Do(c.Auth(WithCtx(ctx, TrainFareReq{
+		TrainNumber:     TrainNumber,
+		FromStationCode: FromStationCode,
+		ToStationCode:   ToStationCode,
+		Age:             Age,
+		Class:           Class,
+		Quota:           Quota,
+		Date:            Date,
+	})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }
