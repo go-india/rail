@@ -1,6 +1,7 @@
 package rail
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -98,6 +99,25 @@ type TrainBetweenStationsResp struct {
 	Total  *int            `json:"total,omitempty"`
 
 	*Response
+}
+
+// TrainBetweenStations gets trains running between stations.
+func (c Client) TrainBetweenStations(ctx context.Context,
+	FromStationCode string,
+	ToStationCode string,
+	Date time.Time,
+) (TrainBetweenStationsResp, error) {
+	if c.Auth == nil {
+		return TrainBetweenStationsResp{}, ErrNoAuth
+	}
+
+	var r TrainBetweenStationsResp
+	err := c.Do(c.Auth(WithCtx(ctx, TrainBetweenStationsReq{
+		FromStationCode: FromStationCode,
+		ToStationCode:   ToStationCode,
+		Date:            Date,
+	})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }
 
 // TrainArrivalsReq parameters
@@ -224,14 +244,34 @@ type TrainArrivalsResp struct {
 	*Response
 }
 
-// StationCodeReq parameters
-type StationCodeReq struct {
+// TrainArrivals get list of trains arriving at a station within
+// a window period along with their live status.
+//
+// Window time in hours to search, valid values are 2 or 4.
+func (c Client) TrainArrivals(ctx context.Context,
+	StationCode string,
+	Hours WindowHour,
+) (TrainArrivalsResp, error) {
+	if c.Auth == nil {
+		return TrainArrivalsResp{}, ErrNoAuth
+	}
+
+	var r TrainArrivalsResp
+	err := c.Do(c.Auth(WithCtx(ctx, TrainArrivalsReq{
+		StationCode: StationCode,
+		Hours:       Hours,
+	})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// StationNameToCodeReq parameters
+type StationNameToCodeReq struct {
 	// Specifies the source station name.
 	StationName string `validate:"required"`
 }
 
-// Request encodes StationCodeReq parameters returning a new http.Request
-func (r StationCodeReq) Request() (*http.Request, error) {
+// Request encodes StationNameToCodeReq parameters returning a new http.Request
+func (r StationNameToCodeReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -246,17 +286,30 @@ func (r StationCodeReq) Request() (*http.Request, error) {
 // Stations holds stations
 type Stations struct {
 	Stations []Station `json:"stations"`
-	Response
+	*Response
 }
 
-// StationNameReq parameters
-type StationNameReq struct {
+// StationNameToCode gets station details of the given station and
+// its nearby stations using partial station name.
+// Station’s name is autocompleted.
+func (c Client) StationNameToCode(ctx context.Context, name string) (Stations, error) {
+	if c.Auth == nil {
+		return Stations{}, ErrNoAuth
+	}
+
+	var r Stations
+	err := c.Do(c.Auth(WithCtx(ctx, StationNameToCodeReq{name})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// StationCodeToNameReq parameters
+type StationCodeToNameReq struct {
 	// Specifies the source station code.
 	StationCode string `validate:"required"`
 }
 
-// Request encodes StationNameReq parameters returning a new http.Request
-func (r StationNameReq) Request() (*http.Request, error) {
+// Request encodes StationCodeToNameReq parameters returning a new http.Request
+func (r StationCodeToNameReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -268,14 +321,27 @@ func (r StationNameReq) Request() (*http.Request, error) {
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
 
-// StationAutoCompleteReq parameters
-type StationAutoCompleteReq struct {
+// StationCodeToName gets station details of the given station and
+// its nearby stations using partial station name.
+// Station’s name is autocompleted.
+func (c Client) StationCodeToName(ctx context.Context, code string) (Stations, error) {
+	if c.Auth == nil {
+		return Stations{}, ErrNoAuth
+	}
+
+	var r Stations
+	err := c.Do(c.Auth(WithCtx(ctx, StationCodeToNameReq{code})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// SuggestStationReq parameters
+type SuggestStationReq struct {
 	// Specifies the source station name.
 	StationName string `validate:"required"`
 }
 
-// Request encodes StationAutoCompleteReq parameters returning a new http.Request
-func (r StationAutoCompleteReq) Request() (*http.Request, error) {
+// Request encodes SuggestStationReq parameters returning a new http.Request
+func (r SuggestStationReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -285,4 +351,15 @@ func (r StationAutoCompleteReq) Request() (*http.Request, error) {
 	urlStr += fmt.Sprintf("/name/%s", r.StationName)
 
 	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
+
+// SuggestStation suggests full station names given a partial station name.
+func (c Client) SuggestStation(ctx context.Context, name string) (Stations, error) {
+	if c.Auth == nil {
+		return Stations{}, ErrNoAuth
+	}
+
+	var r Stations
+	err := c.Do(c.Auth(WithCtx(ctx, SuggestStationReq{name})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }

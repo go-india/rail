@@ -1,6 +1,7 @@
 package rail_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -8,109 +9,71 @@ import (
 )
 
 func TestTrainBetweenStations(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.TrainBetweenStationsReq{
-		FromStationCode: "BE",
-		ToStationCode:   "ADI",
-		Date:            time.Now(),
-	}
-
-	var resp rail.TrainBetweenStationsResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.TrainBetweenStations(context.Background(), "BE", "ADI", time.Now())
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("TrainBetweenStations failed:", err)
 	}
 
-	if len(resp.Trains) < 1 {
-		t.Fatal("invalid trains length")
+	if len(resp.Trains) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
 func TestTrainArrivals(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.TrainArrivalsReq{
-		StationCode: "BE",
-		Hours:       rail.WindowHour2,
-	}
-
-	var resp rail.TrainArrivalsResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.TrainArrivals(context.Background(), "BE", rail.WindowHour2)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("TrainArrivals failed:", err)
 	}
 
-	if len(resp.Trains) < 1 {
-		t.Fatal("invalid trains length")
+	if len(resp.Trains) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestStationCode(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestStationNameToCode(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.StationCodeReq{
-		StationName: "bareilly",
-	}
-
-	var resp rail.Stations
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.StationNameToCode(context.Background(), "bareilly")
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("StationNameToCode failed:", err)
 	}
 
-	if len(resp.Stations) < 1 {
-		t.Fatal("invalid Stations length")
+	if len(resp.Stations) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestStationName(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestStationCodeToName(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.StationNameReq{
-		StationCode: "BE",
-	}
-
-	var resp rail.Stations
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.StationCodeToName(context.Background(), "BE")
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("StationCodeToName failed:", err)
 	}
 
-	if len(resp.Stations) < 1 {
-		t.Fatal("invalid Stations length")
+	if len(resp.Stations) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestStationAutoComplete(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestSuggestStation(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.StationAutoCompleteReq{
-		StationName: "bareilly",
-	}
-
-	var resp rail.Stations
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.SuggestStation(context.Background(), "bareilly")
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("SuggestStation failed:", err)
 	}
 
-	if len(resp.Stations) < 1 {
-		t.Fatal("invalid Stations length")
+	if len(resp.Stations) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
