@@ -36,13 +36,13 @@ type TrainResp struct {
 }
 
 // TrainByNumber gets train details by its number.
-func (c Client) TrainByNumber(ctx context.Context, number uint32) (TrainResp, error) {
+func (c Client) TrainByNumber(ctx context.Context, TrainNumber uint32) (TrainResp, error) {
 	if c.Auth == nil {
 		return TrainResp{}, ErrNoAuth
 	}
 
 	var r TrainResp
-	err := c.Do(c.Auth(WithCtx(ctx, TrainByNumberReq{number})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, TrainByNumberReq{TrainNumber})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -65,13 +65,13 @@ func (r TrainByNameReq) Request() (*http.Request, error) {
 }
 
 // TrainByName gets train details by its number.
-func (c Client) TrainByName(ctx context.Context, name string) (TrainResp, error) {
+func (c Client) TrainByName(ctx context.Context, TrainName string) (TrainResp, error) {
 	if c.Auth == nil {
 		return TrainResp{}, ErrNoAuth
 	}
 
 	var r TrainResp
-	err := c.Do(c.Auth(WithCtx(ctx, TrainByNameReq{name})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, TrainByNameReq{TrainName})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -136,13 +136,13 @@ type CancelledTrainsResp struct {
 }
 
 // CancelledTrains gets list of all cancelled trains on a particular day.
-func (c Client) CancelledTrains(ctx context.Context, date time.Time) (CancelledTrainsResp, error) {
+func (c Client) CancelledTrains(ctx context.Context, Date time.Time) (CancelledTrainsResp, error) {
 	if c.Auth == nil {
 		return CancelledTrainsResp{}, ErrNoAuth
 	}
 
 	var r CancelledTrainsResp
-	err := c.Do(c.Auth(WithCtx(ctx, CancelledTrainsReq{date})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, CancelledTrainsReq{Date})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -226,13 +226,13 @@ type RescheduledTrainsResp struct {
 }
 
 // RescheduledTrains gets list of all rescheduled trains on a particular date.
-func (c Client) RescheduledTrains(ctx context.Context, date time.Time) (RescheduledTrainsResp, error) {
+func (c Client) RescheduledTrains(ctx context.Context, Date time.Time) (RescheduledTrainsResp, error) {
 	if c.Auth == nil {
 		return RescheduledTrainsResp{}, ErrNoAuth
 	}
 
 	var r RescheduledTrainsResp
-	err := c.Do(c.Auth(WithCtx(ctx, RescheduledTrainsReq{date})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, RescheduledTrainsReq{Date})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -262,13 +262,13 @@ type Trains struct {
 }
 
 // SuggestTrainByName suggests full train names or numbers given a partial train name.
-func (c Client) SuggestTrainByName(ctx context.Context, name string) (Trains, error) {
+func (c Client) SuggestTrainByName(ctx context.Context, TrainName string) (Trains, error) {
 	if c.Auth == nil {
 		return Trains{}, ErrNoAuth
 	}
 
 	var r Trains
-	err := c.Do(c.Auth(WithCtx(ctx, SuggestTrainByNameReq{name})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, SuggestTrainByNameReq{TrainName})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -292,12 +292,12 @@ func (r SuggestTrainByCodeReq) Request() (*http.Request, error) {
 }
 
 // SuggestTrainByCode suggests full train names or numbers given a partial train code.
-func (c Client) SuggestTrainByCode(ctx context.Context, code uint32) (Trains, error) {
+func (c Client) SuggestTrainByCode(ctx context.Context, TrainCode uint32) (Trains, error) {
 	if c.Auth == nil {
 		return Trains{}, ErrNoAuth
 	}
 
 	var r Trains
-	err := c.Do(c.Auth(WithCtx(ctx, SuggestTrainByCodeReq{code})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, SuggestTrainByCodeReq{TrainCode})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }

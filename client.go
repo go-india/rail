@@ -1,6 +1,3 @@
-// Package rail provides RailwayAPI.com's v2 REST API Client.
-//
-// You can read the API server documentation at https://railwayapi.com/api
 package rail
 
 import (
@@ -15,20 +12,17 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 const (
-	// DefaultBaseURL is the default base server URL.
+	// DefaultBaseURL is the default base server URL of the API.
 	DefaultBaseURL = "https://api.railwayapi.com"
 	// DefaultUserAgent is the default user agent used by client.
 	DefaultUserAgent = "go-india/rail"
 )
 
 var (
-	// use a single instance of Validate, it caches struct info
-	validate = validator.New()
-	// ErrNoAuth is returned when auth is not defined for a client
+	// ErrNoAuth is returned when auth is not defined for a client.
 	ErrNoAuth = errors.New("rail: no authenticator in client")
 )
 
@@ -62,14 +56,17 @@ func WithCtx(ctx context.Context, r Requester) Requester {
 // Its zero value is usable client that uses http.DefaultTransport.
 // Client is safe for use by multiple go routines.
 type Client struct {
-	// BaseURL is the base URL of the api server
+	// BaseURL is the base URL of the API server.
 	BaseURL *url.URL
-	// User agent used when communicating with the GitHub API.
+	// User agent used when communicating with the API.
 	UserAgent string
-
-	// HTTPClient is a reusable http client instance
+	// HTTPClient is a reusable http client instance.
 	HTTPClient *http.Client
-	// Auth holds an authenticator function
+
+	// Auth holds authenticator function used to authenticate requests.
+	//
+	// Client methods uses Auth to add APIKey to requests.
+	// Use NewAuth(apikey) to generate a new authenticator.
 	Auth func(Requester) Requester
 }
 
@@ -126,6 +123,7 @@ func (c Client) Do(r Requester, intoPtr interface{}) error {
 
 // ErrAPI is returned by API calls when the response status code isn't 200.
 type ErrAPI struct {
+	// Response from the request which returned error.
 	Response *http.Response
 }
 
@@ -142,8 +140,10 @@ func (err ErrAPI) Error() (errStr string) {
 	return errStr
 }
 
-// NewAuth returns an authenticator function.
-func NewAuth(apiKey string) func(Requester) Requester {
+// NewAuth returns a new authenticator function.
+//
+// Assign to client.Auth field to make client methods use it for requests.
+func NewAuth(APIKey string) func(Requester) Requester {
 	return func(r Requester) Requester {
 		return RequesterFunc(func() (*http.Request, error) {
 			req, err := r.Request()
@@ -151,13 +151,15 @@ func NewAuth(apiKey string) func(Requester) Requester {
 				return req, errors.Wrap(err, "generate HTTP request failed")
 			}
 
-			req.URL.Path = path.Join(req.URL.Path, fmt.Sprintf("/apikey/%s/", apiKey))
+			req.URL.Path = path.Join(req.URL.Path, fmt.Sprintf("/apikey/%s/", APIKey))
 			return req, nil
 		})
 	}
 }
 
 // NewClient returns a new RailwayAPI.com authenticated API client.
-func NewClient(apiKey string) Client {
-	return Client{Auth: NewAuth(apiKey)}
+//
+// Use returned client's methods to access various API functions.
+func NewClient(APIKey string) Client {
+	return Client{Auth: NewAuth(APIKey)}
 }

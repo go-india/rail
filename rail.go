@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type (
@@ -12,18 +13,32 @@ type (
 	WindowHour uint8
 )
 
-// Window Hours
 const (
+	// WindowHour2 refers to window hour 2 of indian railway.
 	WindowHour2 = 1 + iota
+	// WindowHour4 refers to window hour 4 of indian railway.
 	WindowHour4
 )
 
-// date return compatible date value
+// use a single instance of Validate, it caches struct info
+var validate = validator.New()
+
+// date return API compatible date value
 func date(t time.Time) string { return t.Format("02-01-2006") }
 
-// Response is the stand response object that comes with every response
+// Response is the standard response field that comes with every
+// response from API.
+//
+// Refer to following URL for more details.
+// https://railwayapi.com/api/
 type Response struct {
-	Debit        int `json:"debit"`
+	// The debit key is included in each API response and it contains
+	// the value by which the user’s credit was debited. Whether the user will
+	// be debited or not depends upon the ResponseCode.
+	Debit int `json:"debit"`
+
+	// ResponseCode key included in each response contains the status
+	// of the result returned.
 	ResponseCode int `json:"response_code"`
 }
 

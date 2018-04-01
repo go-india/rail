@@ -292,13 +292,13 @@ type Stations struct {
 // StationNameToCode gets station details of the given station and
 // its nearby stations using partial station name.
 // Station’s name is autocompleted.
-func (c Client) StationNameToCode(ctx context.Context, name string) (Stations, error) {
+func (c Client) StationNameToCode(ctx context.Context, StationName string) (Stations, error) {
 	if c.Auth == nil {
 		return Stations{}, ErrNoAuth
 	}
 
 	var r Stations
-	err := c.Do(c.Auth(WithCtx(ctx, StationNameToCodeReq{name})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, StationNameToCodeReq{StationName})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -324,13 +324,13 @@ func (r StationCodeToNameReq) Request() (*http.Request, error) {
 // StationCodeToName gets station details of the given station and
 // its nearby stations using partial station name.
 // Station’s name is autocompleted.
-func (c Client) StationCodeToName(ctx context.Context, code string) (Stations, error) {
+func (c Client) StationCodeToName(ctx context.Context, StationCode string) (Stations, error) {
 	if c.Auth == nil {
 		return Stations{}, ErrNoAuth
 	}
 
 	var r Stations
-	err := c.Do(c.Auth(WithCtx(ctx, StationCodeToNameReq{code})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, StationCodeToNameReq{StationCode})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -354,12 +354,12 @@ func (r SuggestStationReq) Request() (*http.Request, error) {
 }
 
 // SuggestStation suggests full station names given a partial station name.
-func (c Client) SuggestStation(ctx context.Context, name string) (Stations, error) {
+func (c Client) SuggestStation(ctx context.Context, StationName string) (Stations, error) {
 	if c.Auth == nil {
 		return Stations{}, ErrNoAuth
 	}
 
 	var r Stations
-	err := c.Do(c.Auth(WithCtx(ctx, SuggestStationReq{name})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, SuggestStationReq{StationName})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }

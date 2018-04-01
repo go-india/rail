@@ -72,8 +72,8 @@ func (s *LiveTrainStatusResp) UnmarshalJSON(data []byte) error {
 
 // LiveTrainStatus gets live running status of a Train.
 func (c Client) LiveTrainStatus(ctx context.Context,
-	number uint32,
-	date time.Time,
+	TrainNumber uint32,
+	Date time.Time,
 ) (LiveTrainStatusResp, error) {
 	if c.Auth == nil {
 		return LiveTrainStatusResp{}, ErrNoAuth
@@ -81,8 +81,8 @@ func (c Client) LiveTrainStatus(ctx context.Context,
 
 	var r LiveTrainStatusResp
 	err := c.Do(c.Auth(WithCtx(ctx, LiveTrainStatusReq{
-		TrainNumber: number,
-		Date:        date,
+		TrainNumber: TrainNumber,
+		Date:        Date,
 	})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
@@ -114,13 +114,13 @@ type TrainRouteResp struct {
 }
 
 // TrainRoute gets details about all the stations in the train’s route.
-func (c Client) TrainRoute(ctx context.Context, number uint32) (TrainRouteResp, error) {
+func (c Client) TrainRoute(ctx context.Context, TrainNumber uint32) (TrainRouteResp, error) {
 	if c.Auth == nil {
 		return TrainRouteResp{}, ErrNoAuth
 	}
 
 	var r TrainRouteResp
-	err := c.Do(c.Auth(WithCtx(ctx, TrainRouteReq{number})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, TrainRouteReq{TrainNumber})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
@@ -257,13 +257,13 @@ func (p *PNRStatusResp) UnmarshalJSON(data []byte) error {
 }
 
 // PNRStatus gets PNR status details.
-func (c Client) PNRStatus(ctx context.Context, number uint64) (PNRStatusResp, error) {
+func (c Client) PNRStatus(ctx context.Context, PNRNumber uint64) (PNRStatusResp, error) {
 	if c.Auth == nil {
 		return PNRStatusResp{}, ErrNoAuth
 	}
 
 	var r PNRStatusResp
-	err := c.Do(c.Auth(WithCtx(ctx, PNRStatusReq{number})), &r)
+	err := c.Do(c.Auth(WithCtx(ctx, PNRStatusReq{PNRNumber})), &r)
 	return r, errors.Wrap(err, "Client.Do failed")
 }
 
