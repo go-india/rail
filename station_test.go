@@ -9,7 +9,7 @@ import (
 )
 
 func TestTrainBetweenStations(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.TrainBetweenStations(context.Background(), "BE", "ADI", time.Now())
@@ -23,7 +23,7 @@ func TestTrainBetweenStations(t *testing.T) {
 }
 
 func TestTrainArrivals(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.TrainArrivals(context.Background(), "BE", rail.WindowHour2)
@@ -37,7 +37,7 @@ func TestTrainArrivals(t *testing.T) {
 }
 
 func TestStationNameToCode(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.StationNameToCode(context.Background(), "bareilly")
@@ -51,7 +51,7 @@ func TestStationNameToCode(t *testing.T) {
 }
 
 func TestStationCodeToName(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.StationCodeToName(context.Background(), "BE")
@@ -65,7 +65,7 @@ func TestStationCodeToName(t *testing.T) {
 }
 
 func TestSuggestStation(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.SuggestStation(context.Background(), "bareilly")

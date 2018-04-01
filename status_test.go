@@ -9,7 +9,7 @@ import (
 )
 
 func TestLiveTrainStatus(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.LiveTrainStatus(context.Background(), 14311, time.Now())
@@ -23,7 +23,7 @@ func TestLiveTrainStatus(t *testing.T) {
 }
 
 func TestTrainRoute(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.TrainRoute(context.Background(), 14311)
@@ -37,7 +37,7 @@ func TestTrainRoute(t *testing.T) {
 }
 
 func TestCheckSeat(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	d := time.Date(2018, time.April, 5, 0, 0, 0, 0, time.UTC)
@@ -53,7 +53,7 @@ func TestCheckSeat(t *testing.T) {
 }
 
 func TestPNRStatus(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.PNRStatus(context.Background(), 2144287856)
@@ -67,7 +67,7 @@ func TestPNRStatus(t *testing.T) {
 }
 
 func TestTrainFare(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	d := time.Date(2018, time.April, 5, 0, 0, 0, 0, time.UTC)

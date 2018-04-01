@@ -9,7 +9,7 @@ import (
 )
 
 func TestTrainByNumber(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.TrainByNumber(context.Background(), 14311)
@@ -23,7 +23,7 @@ func TestTrainByNumber(t *testing.T) {
 }
 
 func TestTrainByName(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.TrainByName(context.Background(), "duranto")
@@ -37,7 +37,7 @@ func TestTrainByName(t *testing.T) {
 }
 
 func TestCancelledTrains(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.CancelledTrains(context.Background(), time.Now())
@@ -51,7 +51,7 @@ func TestCancelledTrains(t *testing.T) {
 }
 
 func TestRescheduledTrains(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.RescheduledTrains(context.Background(), time.Now())
@@ -65,7 +65,7 @@ func TestRescheduledTrains(t *testing.T) {
 }
 
 func TestSuggestTrainByName(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.SuggestTrainByName(context.Background(), "duranto")
@@ -79,7 +79,7 @@ func TestSuggestTrainByName(t *testing.T) {
 }
 
 func TestSuggestTrainByCode(t *testing.T) {
-	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
 	resp, err := c.SuggestTrainByCode(context.Background(), 14311)

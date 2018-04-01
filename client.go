@@ -1,4 +1,4 @@
-// Package rail provides railwayapi.com's v2 REST API Client.
+// Package rail provides RailwayAPI.com's v2 REST API Client.
 //
 // You can read the API server documentation at https://railwayapi.com/api
 package rail
@@ -155,4 +155,9 @@ func NewAuth(apiKey string) func(Requester) Requester {
 			return req, nil
 		})
 	}
+}
+
+// NewClient returns a new RailwayAPI.com authenticated API client.
+func NewClient(apiKey string) Client {
+	return Client{Auth: NewAuth(apiKey)}
 }
