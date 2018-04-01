@@ -1,6 +1,7 @@
 package rail
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -34,6 +35,17 @@ type TrainResp struct {
 	*Response
 }
 
+// TrainByNumber gets train details by its number.
+func (c Client) TrainByNumber(ctx context.Context, number uint32) (TrainResp, error) {
+	if c.Auth == nil {
+		return TrainResp{}, ErrNoAuth
+	}
+
+	var r TrainResp
+	err := c.Do(c.Auth(WithCtx(ctx, TrainByNumberReq{number})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
 // TrainByNameReq parameters
 type TrainByNameReq struct {
 	TrainName string `validate:"required"` // Specifies the train name.
@@ -50,6 +62,17 @@ func (r TrainByNameReq) Request() (*http.Request, error) {
 	urlStr += fmt.Sprintf("/train/%s", r.TrainName)
 
 	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
+
+// TrainByName gets train details by its number.
+func (c Client) TrainByName(ctx context.Context, name string) (TrainResp, error) {
+	if c.Auth == nil {
+		return TrainResp{}, ErrNoAuth
+	}
+
+	var r TrainResp
+	err := c.Do(c.Auth(WithCtx(ctx, TrainByNameReq{name})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }
 
 // CancelledTrainsReq parameters
@@ -110,6 +133,17 @@ type CancelledTrainsResp struct {
 	Total  *int        `json:"total,omitempty"`
 
 	*Response
+}
+
+// CancelledTrains gets list of all cancelled trains on a particular day.
+func (c Client) CancelledTrains(ctx context.Context, date time.Time) (CancelledTrainsResp, error) {
+	if c.Auth == nil {
+		return CancelledTrainsResp{}, ErrNoAuth
+	}
+
+	var r CancelledTrainsResp
+	err := c.Do(c.Auth(WithCtx(ctx, CancelledTrainsReq{date})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }
 
 // RescheduledTrainsReq parameters
@@ -191,14 +225,25 @@ type RescheduledTrainsResp struct {
 	*Response
 }
 
-// TrainNameAutoCompleteReq parameters
-type TrainNameAutoCompleteReq struct {
+// RescheduledTrains gets list of all rescheduled trains on a particular date.
+func (c Client) RescheduledTrains(ctx context.Context, date time.Time) (RescheduledTrainsResp, error) {
+	if c.Auth == nil {
+		return RescheduledTrainsResp{}, ErrNoAuth
+	}
+
+	var r RescheduledTrainsResp
+	err := c.Do(c.Auth(WithCtx(ctx, RescheduledTrainsReq{date})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// SuggestTrainByNameReq parameters
+type SuggestTrainByNameReq struct {
 	// Specifies the Train name.
 	TrainName string `validate:"required"`
 }
 
-// Request encodes TrainNameAutoCompleteReq parameters returning a new http.Request
-func (r TrainNameAutoCompleteReq) Request() (*http.Request, error) {
+// Request encodes SuggestTrainByNameReq parameters returning a new http.Request
+func (r SuggestTrainByNameReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -216,14 +261,25 @@ type Trains struct {
 	*Response
 }
 
-// TrainCodeAutoCompleteReq parameters
-type TrainCodeAutoCompleteReq struct {
+// SuggestTrainByName suggests full train names or numbers given a partial train name.
+func (c Client) SuggestTrainByName(ctx context.Context, name string) (Trains, error) {
+	if c.Auth == nil {
+		return Trains{}, ErrNoAuth
+	}
+
+	var r Trains
+	err := c.Do(c.Auth(WithCtx(ctx, SuggestTrainByNameReq{name})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
+}
+
+// SuggestTrainByCodeReq parameters
+type SuggestTrainByCodeReq struct {
 	// Specifies the Train code.
 	TrainCode uint32 `validate:"required"`
 }
 
-// Request encodes TrainCodeAutoCompleteReq parameters returning a new http.Request
-func (r TrainCodeAutoCompleteReq) Request() (*http.Request, error) {
+// Request encodes SuggestTrainByCodeReq parameters returning a new http.Request
+func (r SuggestTrainByCodeReq) Request() (*http.Request, error) {
 	err := validate.Struct(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid request")
@@ -233,4 +289,15 @@ func (r TrainCodeAutoCompleteReq) Request() (*http.Request, error) {
 	urlStr += fmt.Sprintf("/train/%d", r.TrainCode)
 
 	return http.NewRequest(http.MethodGet, urlStr, nil)
+}
+
+// SuggestTrainByCode suggests full train names or numbers given a partial train code.
+func (c Client) SuggestTrainByCode(ctx context.Context, code uint32) (Trains, error) {
+	if c.Auth == nil {
+		return Trains{}, ErrNoAuth
+	}
+
+	var r Trains
+	err := c.Do(c.Auth(WithCtx(ctx, SuggestTrainByCodeReq{code})), &r)
+	return r, errors.Wrap(err, "Client.Do failed")
 }

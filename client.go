@@ -4,6 +4,7 @@
 package rail
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,8 +25,12 @@ const (
 	DefaultUserAgent = "go-india/rail"
 )
 
-// use a single instance of Validate, it caches struct info
-var validate = validator.New()
+var (
+	// use a single instance of Validate, it caches struct info
+	validate = validator.New()
+	// ErrNoAuth is returned when auth is not defined for a client
+	ErrNoAuth = errors.New("rail: no authenticator in client")
+)
 
 // Requester is implemented by any value that has a Request method.
 type Requester interface {
@@ -39,6 +44,17 @@ type RequesterFunc func() (*http.Request, error)
 // Request invokes 'f'
 func (f RequesterFunc) Request() (*http.Request, error) {
 	return f()
+}
+
+// WithCtx applies 'ctx' to the the http.Request and returns a new Requester
+func WithCtx(ctx context.Context, r Requester) Requester {
+	if ctx == nil {
+		return r
+	}
+	return RequesterFunc(func() (*http.Request, error) {
+		req, err := r.Request()
+		return req.WithContext(ctx), err
+	})
 }
 
 // Client is an railwayapi's HTTP REST API client instance.

@@ -1,6 +1,7 @@
 package rail_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -8,127 +9,85 @@ import (
 )
 
 func TestTrainByNumber(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.TrainByNumberReq{
-		TrainNumber: 14311,
-	}
-
-	var resp rail.TrainResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.TrainByNumber(context.Background(), 14311)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("TrainByNumber failed:", err)
 	}
 
-	if len(resp.Train.Classes) < 1 {
-		t.Fatal("invalid classes length")
+	if len(resp.Train.Classes) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
 func TestTrainByName(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.TrainByNameReq{
-		TrainName: "bhopal",
-	}
-
-	var resp rail.TrainResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.TrainByName(context.Background(), "duranto")
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("TrainByName failed:", err)
 	}
 
-	if len(resp.Train.Classes) < 1 {
-		t.Fatal("invalid classes length")
+	if len(resp.Train.Classes) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
 func TestCancelledTrains(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.CancelledTrainsReq{
-		Date: time.Now(),
-	}
-
-	var resp rail.CancelledTrainsResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.CancelledTrains(context.Background(), time.Now())
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("CancelledTrains failed:", err)
 	}
 
-	if len(resp.Trains) < 1 {
-		t.Fatal("invalid trains length")
+	if len(resp.Trains) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
 func TestRescheduledTrains(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.RescheduledTrainsReq{
-		Date: time.Now(),
-	}
-
-	var resp rail.RescheduledTrainsResp
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.RescheduledTrains(context.Background(), time.Now())
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("RescheduledTrains failed:", err)
 	}
 
-	if len(resp.Trains) < 1 {
-		t.Fatal("invalid trains length")
+	if len(resp.Trains) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestTrainNameAutoComplete(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestSuggestTrainByName(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.TrainNameAutoCompleteReq{
-		TrainName: "duranto",
-	}
-
-	var resp rail.Trains
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.SuggestTrainByName(context.Background(), "duranto")
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("SuggestTrainByName failed:", err)
 	}
 
-	if len(resp.Trains) < 1 {
-		t.Fatal("invalid Trains length")
+	if len(resp.Trains) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
 
-func TestTrainCodeAutoComplete(t *testing.T) {
-	c := &rail.Client{
-		Auth: rail.NewAuth(getAPIKey()),
-	}
-	testClient(c, t)
+func TestSuggestTrainByCode(t *testing.T) {
+	c := rail.Client{Auth: rail.NewAuth(getAPIKey())}
+	testClient(&c, t)
 
-	req := rail.TrainCodeAutoCompleteReq{
-		TrainCode: 14311,
-	}
-
-	var resp rail.Trains
-	err := c.Do(c.Auth(req), &resp)
+	resp, err := c.SuggestTrainByCode(context.Background(), 14311)
 	if err != nil {
-		t.Fatalf("client Do failed: %+v", err)
+		t.Fatal("SuggestTrainByCode failed:", err)
 	}
 
-	if len(resp.Trains) < 1 {
-		t.Fatal("invalid Trains length")
+	if len(resp.Trains) < 1 || resp.ResponseCode != 200 {
+		t.Fatal("invalid response")
 	}
 }
