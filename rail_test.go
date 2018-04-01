@@ -62,9 +62,7 @@ func testClient(c *rail.Client, t *testing.T) {
 		return
 	}
 
-	c.HTTPClient.Transport = &loaderTransport{
-		filepath: testServer.String() + "/" + filename(t),
-	}
+	c.HTTPClient.Transport = &loaderTransport{t}
 	return
 }
 
@@ -92,10 +90,10 @@ func (st saverTransport) RoundTrip(r *http.Request) (*http.Response, error) {
 }
 
 // loaderTransport loads response from testdata file
-type loaderTransport struct{ filepath string }
+type loaderTransport struct{ t *testing.T }
 
 func (lt loaderTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return http.Get(lt.filepath)
+	return http.Get(testServer.String() + "/" + filename(lt.t))
 }
 
 func filename(t *testing.T) string {

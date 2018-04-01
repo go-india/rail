@@ -1,6 +1,8 @@
 package rail_test
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -54,13 +56,37 @@ func TestClientDo(t *testing.T) {
 		{
 			inputRequester: mockRequester{true},
 			inputIntoPtr:   temp,
-			expected:       "invalid character 'I' looking for beginning of value",
+			expected:       "UnmarshalJSON failed",
 
 			setup: func() {
 				c.HTTPClient = &http.Client{}
-				c.HTTPClient.Transport = loaderTransport{
-					testServer.String() + "/Invalid.txt",
-				}
+				c.HTTPClient.Transport = mockTransport(
+					func(r *http.Request) (*http.Response, error) {
+						return &http.Response{
+							StatusCode: http.StatusOK,
+							Body:       ioutil.NopCloser(bytes.NewBufferString("Boom")),
+							Request:    &http.Request{URL: url},
+						}, nil
+					},
+				)
+			},
+			clear: func() { c.HTTPClient = nil },
+		},
+		{
+			inputRequester: mockRequester{true},
+			inputIntoPtr:   temp,
+			expected:       "request to",
+
+			setup: func() {
+				c.HTTPClient = &http.Client{}
+				c.HTTPClient.Transport = mockTransport(
+					func(r *http.Request) (*http.Response, error) {
+						return &http.Response{
+							StatusCode: http.StatusForbidden,
+							Request:    &http.Request{URL: url},
+						}, nil
+					},
+				)
 			},
 			clear: func() { c.HTTPClient = nil },
 		},
@@ -91,4 +117,11 @@ func (r mockRequester) Request() (*http.Request, error) {
 		return http.NewRequest(http.MethodGet, "http://0.0.0.0", nil)
 	}
 	return nil, errors.New("error")
+}
+
+// loaderTransport loads response passed
+type mockTransport func(*http.Request) (*http.Response, error)
+
+func (mt mockTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	return mt(r)
 }

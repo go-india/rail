@@ -9,7 +9,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"path"
 	"time"
@@ -84,47 +83,36 @@ func (c Client) Do(r Requester, intoPtr interface{}) error {
 	defer func() {
 		// Read the body if small so underlying TCP connection will be re-used.
 		// No need to check for errors: if it fails, Transport won't reuse it anyway.
-		const maxBodySlurpSize = 2 << 10
-		if rsp.ContentLength == -1 || rsp.ContentLength <= maxBodySlurpSize {
-			io.CopyN(ioutil.Discard, rsp.Body, maxBodySlurpSize)
+		if rsp.Body != nil {
+			const maxBodySlurpSize = 2 << 10
+			if rsp.ContentLength == -1 || rsp.ContentLength <= maxBodySlurpSize {
+				io.CopyN(ioutil.Discard, rsp.Body, maxBodySlurpSize)
+			}
+			rsp.Body.Close()
 		}
-		rsp.Body.Close()
 	}()
 
-	body, _ := httputil.DumpResponse(rsp, true)
-	err = json.NewDecoder(rsp.Body).Decode(intoPtr)
-
-	if rsp.StatusCode != http.StatusOK || err != nil {
-		return ErrAPI{
-			Header:     rsp.Header,
-			URL:        rsp.Request.URL,
-			StatusCode: rsp.StatusCode,
-			Body:       body,
-			Err:        err,
-		}
+	if rsp.StatusCode != http.StatusOK {
+		return ErrAPI{rsp}
 	}
 
-	return nil
+	return errors.Wrap(json.NewDecoder(rsp.Body).Decode(intoPtr), "UnmarshalJSON failed")
 }
 
 // ErrAPI is returned by API calls when the response status code isn't 200.
 type ErrAPI struct {
-	StatusCode int
-	Header     http.Header
-	URL        *url.URL
-	Body       []byte
-	Err        error
+	Response *http.Response
 }
 
 // Error implements the error interface.
-func (err ErrAPI) Error() string {
-	errStr := fmt.Sprintf("request to %s returned %d (%s)", err.URL,
-		err.StatusCode, http.StatusText(err.StatusCode))
-
-	errStr += fmt.Sprintf("\nerror: %+v", err.Err)
-
-	if err.Body != nil {
-		errStr += fmt.Sprintf("\nresponse:\n\n%s\n", err.Body)
+func (err ErrAPI) Error() (errStr string) {
+	if err.Response != nil {
+		errStr += fmt.Sprintf(
+			"request to %s returned %d (%s)",
+			err.Response.Request.URL,
+			err.Response.StatusCode,
+			http.StatusText(err.Response.StatusCode),
+		)
 	}
 	return errStr
 }
