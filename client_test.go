@@ -18,6 +18,7 @@ func TestClientDo(t *testing.T) {
 	var (
 		temp   interface{}
 		url, _ = url.Parse("http://0.0.0.0")
+		req, _ = http.NewRequest(http.MethodGet, url.String(), nil)
 	)
 
 	tests := []struct {
@@ -35,28 +36,36 @@ func TestClientDo(t *testing.T) {
 			expected:       "requester is nil",
 		},
 		{
-			inputRequester: mockRequester{},
-			inputIntoPtr:   temp,
-			expected:       "generate HTTP request failed",
+			inputRequester: mockRequester(
+				func() (*http.Request, error) { return nil, errors.New("error") },
+			),
+			inputIntoPtr: temp,
+			expected:     "generate HTTP request failed",
 		},
 		{
-			inputRequester: mockRequester{true},
-			inputIntoPtr:   temp,
-			expected:       "HTTP request failed",
+			inputRequester: mockRequester(
+				func() (*http.Request, error) { return req, nil },
+			),
+			inputIntoPtr: temp,
+			expected:     "HTTP request failed",
 
 			setup: func() { c.HTTPClient = nil },
 		},
 		{
-			inputRequester: mockRequester{true},
-			inputIntoPtr:   temp,
-			expected:       "HTTP request failed",
+			inputRequester: mockRequester(
+				func() (*http.Request, error) { return req, nil },
+			),
+			inputIntoPtr: temp,
+			expected:     "HTTP request failed",
 
 			setup: func() { c.BaseURL = url },
 		},
 		{
-			inputRequester: mockRequester{true},
-			inputIntoPtr:   temp,
-			expected:       "UnmarshalJSON failed",
+			inputRequester: mockRequester(
+				func() (*http.Request, error) { return req, nil },
+			),
+			inputIntoPtr: temp,
+			expected:     "UnmarshalJSON failed",
 
 			setup: func() {
 				c.HTTPClient = &http.Client{}
@@ -65,7 +74,7 @@ func TestClientDo(t *testing.T) {
 						return &http.Response{
 							StatusCode: http.StatusOK,
 							Body:       ioutil.NopCloser(bytes.NewBufferString("Boom")),
-							Request:    &http.Request{URL: url},
+							Request:    req,
 						}, nil
 					},
 				)
@@ -73,9 +82,11 @@ func TestClientDo(t *testing.T) {
 			clear: func() { c.HTTPClient = nil },
 		},
 		{
-			inputRequester: mockRequester{true},
-			inputIntoPtr:   temp,
-			expected:       "request to",
+			inputRequester: mockRequester(
+				func() (*http.Request, error) { return req, nil },
+			),
+			inputIntoPtr: temp,
+			expected:     "request to",
 
 			setup: func() {
 				c.HTTPClient = &http.Client{}
@@ -83,7 +94,7 @@ func TestClientDo(t *testing.T) {
 					func(r *http.Request) (*http.Response, error) {
 						return &http.Response{
 							StatusCode: http.StatusForbidden,
-							Request:    &http.Request{URL: url},
+							Request:    req,
 						}, nil
 					},
 				)
@@ -110,18 +121,11 @@ func TestClientDo(t *testing.T) {
 }
 
 // mockRequester mocks Requester and helps in testing.
-type mockRequester struct{ r bool }
+type mockRequester func() (*http.Request, error)
 
-func (r mockRequester) Request() (*http.Request, error) {
-	if r.r {
-		return http.NewRequest(http.MethodGet, "http://0.0.0.0", nil)
-	}
-	return nil, errors.New("error")
-}
+func (mr mockRequester) Request() (*http.Request, error) { return mr() }
 
 // loaderTransport loads response passed
 type mockTransport func(*http.Request) (*http.Response, error)
 
-func (mt mockTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return mt(r)
-}
+func (mt mockTransport) RoundTrip(r *http.Request) (*http.Response, error) { return mt(r) }
