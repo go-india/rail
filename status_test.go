@@ -57,12 +57,12 @@ func TestCheckSeat(t *testing.T) {
 	testClient(c, t)
 
 	req := rail.CheckSeatReq{
-		TrainNumber: 14311,
-		StationFrom: "BE",
-		StationTo:   "ADI",
-		Class:       "SL",
-		Quota:       "GN",
-		Date:        time.Date(2018, time.April, 05, 0, 0, 0, 0, time.UTC),
+		TrainNumber:     14311,
+		FromStationCode: "BE",
+		ToStationCode:   "ADI",
+		Class:           "SL",
+		Quota:           "GN",
+		Date:            time.Date(2018, time.April, 05, 0, 0, 0, 0, time.UTC),
 	}
 
 	var resp rail.CheckSeatResp
@@ -104,13 +104,13 @@ func TestFare(t *testing.T) {
 	testClient(c, t)
 
 	req := rail.FareReq{
-		TrainNumber: 14311,
-		StationFrom: "BE",
-		StationTo:   "ADI",
-		Age:         24,
-		Class:       "SL",
-		Quota:       "GN",
-		Date:        time.Date(2018, time.April, 05, 0, 0, 0, 0, time.UTC),
+		TrainNumber:     14311,
+		FromStationCode: "BE",
+		ToStationCode:   "ADI",
+		Age:             24,
+		Class:           "SL",
+		Quota:           "GN",
+		Date:            time.Date(2018, time.April, 05, 0, 0, 0, 0, time.UTC),
 	}
 
 	var resp rail.FareResp

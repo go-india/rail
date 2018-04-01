@@ -133,8 +133,8 @@ func (r RescheduledTrainsReq) Request() (*http.Request, error) {
 
 // RescheduledTrain holds rescheduled train detail
 type RescheduledTrain struct {
-	StationFrom *Station `json:"from_station,omitempty"`
-	StationTo   *Station `json:"to_station,omitempty"`
+	FromStation *Station `json:"from_station,omitempty"`
+	ToStation   *Station `json:"to_station,omitempty"`
 
 	TimeDifference  *time.Duration // `json:"time_diff,omitempty"`
 	RescheduledDate *time.Time     // `json:"rescheduled_date,omitempty"`

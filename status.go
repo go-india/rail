@@ -100,9 +100,9 @@ type CheckSeatReq struct {
 	// Specifies the train number.
 	TrainNumber uint32 `validate:"required"`
 	// Specifies the source station code.
-	StationFrom string `validate:"required"`
+	FromStationCode string `validate:"required"`
 	// Specifies the destination station code.
-	StationTo string `validate:"required"`
+	ToStationCode string `validate:"required"`
 	// Specifies the date for which result is required.
 	Date time.Time `validate:"required"`
 	// Specifies the class code. Ex: SL/AC/2S
@@ -122,8 +122,8 @@ func (r CheckSeatReq) Request() (*http.Request, error) {
 	urlStr += fmt.Sprintf(
 		"/train/%d/source/%s/dest/%s/date/%s/pref/%s/quota/%s",
 		r.TrainNumber,
-		r.StationFrom,
-		r.StationTo,
+		r.FromStationCode,
+		r.ToStationCode,
 		date(r.Date),
 		r.Class,
 		r.Quota,
@@ -135,8 +135,8 @@ func (r CheckSeatReq) Request() (*http.Request, error) {
 // CheckSeatResp holds seat availability response
 type CheckSeatResp struct {
 	Train        *Train      `json:"train,omitempty"`
-	StationFrom  *Station    `json:"from_station,omitempty"`
-	StationTo    *Station    `json:"to_station,omitempty"`
+	FromStation  *Station    `json:"from_station,omitempty"`
+	ToStation    *Station    `json:"to_station,omitempty"`
 	Quota        *Quota      `json:"quota,omitempty"`
 	JourneyClass *Class      `json:"journey_class,omitempty"`
 	Availability []Available `json:"availability,omitempty"`
@@ -167,8 +167,8 @@ type PNRResp struct {
 	ChartPrepared   *bool       `json:"chart_prepared,omitempty"`
 	DateOfJourney   *time.Time  // `json:"doj,omitempty"`
 	BoardingPoint   *Station    `json:"boarding_point,omitempty"`
-	StationFrom     *Station    `json:"from_station,omitempty"`
-	StationTo       *Station    `json:"to_station,omitempty"`
+	FromStation     *Station    `json:"from_station,omitempty"`
+	ToStation       *Station    `json:"to_station,omitempty"`
 	TotalPassengers *int        `json:"total_passengers,omitempty"`
 	JourneyClass    *Class      `json:"journey_class,omitempty"`
 	Train           *Train      `json:"train,omitempty"`
@@ -207,9 +207,9 @@ type FareReq struct {
 	// Specifies the train number.
 	TrainNumber uint32 `validate:"required"`
 	// Specifies the source station code.
-	StationFrom string `validate:"required"`
+	FromStationCode string `validate:"required"`
 	// Specifies the destination station code.
-	StationTo string `validate:"required"`
+	ToStationCode string `validate:"required"`
 	// Specifies the age code of passenger
 	Age uint8 `url:"age" validate:"required"`
 	// Specifies the date for which result is required.
@@ -231,8 +231,8 @@ func (r FareReq) Request() (*http.Request, error) {
 	urlStr += fmt.Sprintf(
 		"/train/%d/source/%s/dest/%s/age/%d/pref/%s/quota/%s/date/%s",
 		r.TrainNumber,
-		r.StationFrom,
-		r.StationTo,
+		r.FromStationCode,
+		r.ToStationCode,
 		r.Age,
 		r.Class,
 		r.Quota,
@@ -244,10 +244,10 @@ func (r FareReq) Request() (*http.Request, error) {
 
 // FareResp holds fare details for a train journey
 type FareResp struct {
-	StationTo    *Station    `json:"to_station,omitempty"`
+	FromStation  *Station    `json:"from_station,omitempty"`
+	ToStation    *Station    `json:"to_station,omitempty"`
 	Quota        *Quota      `json:"quota,omitempty"`
 	Train        *Train      `json:"train,omitempty"`
-	StationFrom  *Station    `json:"from_station,omitempty"`
 	Fare         *float64    `json:"fare,omitempty"`
 	JourneyClass *Class      `json:"journey_class,omitempty"`
 	Availability []Available `json:"availability,omitempty"`

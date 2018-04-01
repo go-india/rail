@@ -137,10 +137,10 @@ type Route struct {
 	ActualArrivalDate    *time.Time //`json:"actarr_date,omitempty"`
 	ScheduledArrivalDate *time.Time //`json:"scharr_date,omitempty"`
 
-	ScheduledArrival   *time.Time //`json:"scharr,omitempty"`
-	ScheduledDeparture *time.Time //`json:"schdep,omitempty"`
-	ActualDeparture    *time.Time //`json:"actdep,omitempty"`
-	ActualArrival      *time.Time //`json:"actarr,omitempty"`
+	ScheduledArrivalTime   *time.Time //`json:"scharr,omitempty"`
+	ScheduledDepartureTime *time.Time //`json:"schdep,omitempty"`
+	ActualDepartureTime    *time.Time //`json:"actdep,omitempty"`
+	ActualArrivalTime      *time.Time //`json:"actarr,omitempty"`
 
 	HasArrived  *bool `json:"has_arrived,omitempty"`
 	HasDeparted *bool `json:"has_departed,omitempty"`
@@ -162,10 +162,10 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 		ActualArrivalDate    string `json:"actarr_date"`
 		ScheduledArrivalDate string `json:"scharr_date"`
 
-		ScheduledArrival   string `json:"scharr"`
-		ScheduledDeparture string `json:"schdep"`
-		ActualDeparture    string `json:"actdep"`
-		ActualArrival      string `json:"actarr"`
+		ScheduledArrivalTime   string `json:"scharr"`
+		ScheduledDepartureTime string `json:"schdep"`
+		ActualDepartureTime    string `json:"actdep"`
+		ActualArrivalTime      string `json:"actarr"`
 	}{}
 	if err := json.Unmarshal(data, &t); err != nil {
 		return errors.Wrap(err, "UnmarshalJSON failed")
@@ -173,36 +173,36 @@ func (r *Route) UnmarshalJSON(data []byte) error {
 
 	*r = Route(t.Alias)
 
-	if len(t.ScheduledArrival) == 5 {
-		sa, err := time.Parse("15:04", t.ScheduledArrival)
+	if len(t.ScheduledArrivalTime) == 5 {
+		sa, err := time.Parse("15:04", t.ScheduledArrivalTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledArrival failed")
 		}
-		r.ScheduledArrival = &sa
+		r.ScheduledArrivalTime = &sa
 	}
 
-	if len(t.ScheduledDeparture) == 5 {
-		sd, err := time.Parse("15:04", t.ScheduledDeparture)
+	if len(t.ScheduledDepartureTime) == 5 {
+		sd, err := time.Parse("15:04", t.ScheduledDepartureTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledDeparture failed")
 		}
-		r.ScheduledDeparture = &sd
+		r.ScheduledDepartureTime = &sd
 	}
 
-	if len(t.ActualDeparture) == 5 {
-		ad, err := time.Parse("15:04", t.ActualDeparture)
+	if len(t.ActualDepartureTime) == 5 {
+		ad, err := time.Parse("15:04", t.ActualDepartureTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ActualDeparture failed")
 		}
-		r.ActualDeparture = &ad
+		r.ActualDepartureTime = &ad
 	}
 
-	if len(t.ActualArrival) == 5 {
-		aa, err := time.Parse("15:04", t.ActualArrival)
+	if len(t.ActualArrivalTime) == 5 {
+		aa, err := time.Parse("15:04", t.ActualArrivalTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ActualArrival failed")
 		}
-		r.ActualArrival = &aa
+		r.ActualArrivalTime = &aa
 	}
 
 	if t.ActualArrivalDate != "" {

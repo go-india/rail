@@ -14,9 +14,9 @@ func TestTrainBetweenStations(t *testing.T) {
 	testClient(c, t)
 
 	req := rail.TrainBetweenStationsReq{
-		StationFrom: "BE",
-		StationTo:   "ADI",
-		Date:        time.Now(),
+		FromStationCode: "BE",
+		ToStationCode:   "ADI",
+		Date:            time.Now(),
 	}
 
 	var resp rail.TrainBetweenStationsResp
@@ -37,8 +37,8 @@ func TestTrainArrivals(t *testing.T) {
 	testClient(c, t)
 
 	req := rail.TrainArrivalsReq{
-		Station: "BE",
-		Hours:   rail.WindowHour2,
+		StationCode: "BE",
+		Hours:       rail.WindowHour2,
 	}
 
 	var resp rail.TrainArrivalsResp

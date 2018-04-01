@@ -13,9 +13,9 @@ import (
 // TrainBetweenStationsReq parameters
 type TrainBetweenStationsReq struct {
 	// Specifies the source station code.
-	StationFrom string `validate:"required"`
+	FromStationCode string `validate:"required"`
 	// Specifies the destination station code.
-	StationTo string `validate:"required"`
+	ToStationCode string `validate:"required"`
 	// Specifies the date for which result is required.
 	Date time.Time `validate:"required"`
 }
@@ -30,8 +30,8 @@ func (r TrainBetweenStationsReq) Request() (*http.Request, error) {
 	urlStr := DefaultBaseURL + "/v2/between"
 	urlStr += fmt.Sprintf(
 		"/source/%s/dest/%s/date/%s",
-		r.StationFrom,
-		r.StationTo,
+		r.FromStationCode,
+		r.ToStationCode,
 		date(r.Date),
 	)
 
@@ -42,11 +42,11 @@ func (r TrainBetweenStationsReq) Request() (*http.Request, error) {
 type ExtendedTrain struct {
 	*Train
 
-	StationTo          *Station       `json:"to_station,omitempty"`
-	StationFrom        *Station       `json:"from_station,omitempty"`
-	SourceDeparture    *time.Time     // `json:"src_departure_time,omitempty"`
-	DestinationArrival *time.Time     // `json:"dest_arrival_time,omitempty"`
-	TravelDuration     *time.Duration // `json:"travel_time,omitempty"`
+	ToStation              *Station       `json:"to_station,omitempty"`
+	FromStation            *Station       `json:"from_station,omitempty"`
+	SourceDepartureTime    *time.Time     // `json:"src_departure_time,omitempty"`
+	DestinationArrivalTime *time.Time     // `json:"dest_arrival_time,omitempty"`
+	TravelDuration         *time.Duration // `json:"travel_time,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
@@ -69,7 +69,7 @@ func (et *ExtendedTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse SourceDepartureTime failed")
 		}
-		et.SourceDeparture = &sdt
+		et.SourceDepartureTime = &sdt
 	}
 
 	if len(t.DestinationArrivalTime) == 5 {
@@ -77,7 +77,7 @@ func (et *ExtendedTrain) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return errors.Wrap(err, "parse DestinationArrivalTime failed")
 		}
-		et.DestinationArrival = &dat
+		et.DestinationArrivalTime = &dat
 	}
 
 	if len(t.TravelTime) == 5 {
@@ -103,7 +103,7 @@ type TrainBetweenStationsResp struct {
 // TrainArrivalsReq parameters
 type TrainArrivalsReq struct {
 	// Specifies the source station code.
-	Station string `validate:"required"`
+	StationCode string `validate:"required"`
 
 	// Specifies the windows hours to search.
 	//
@@ -129,7 +129,7 @@ func (r TrainArrivalsReq) Request() (*http.Request, error) {
 	}
 
 	urlStr := DefaultBaseURL + "/v2/arrivals"
-	urlStr += fmt.Sprintf("/station/%s/hours/%d", r.Station, hours)
+	urlStr += fmt.Sprintf("/station/%s/hours/%d", r.StationCode, hours)
 
 	return http.NewRequest(http.MethodGet, urlStr, nil)
 }
@@ -138,25 +138,24 @@ func (r TrainArrivalsReq) Request() (*http.Request, error) {
 type TrainWithTimings struct {
 	*Train
 
-	DelayArrival   *time.Time //`json:"delayarr,omitempty"`
-	DelayDeparture *time.Time //`json:"delaydep,omitempty"`
-
-	ScheduledArrival   *time.Time //`json:"scharr,omitempty"`
-	ScheduledDeparture *time.Time //`json:"schdep,omitempty"`
-	ActualDeparture    *time.Time //`json:"actdep,omitempty"`
-	ActualArrival      *time.Time //`json:"actarr,omitempty"`
+	DelayArrivalTime       *time.Time //`json:"delayarr,omitempty"`
+	DelayDepartureTime     *time.Time //`json:"delaydep,omitempty"`
+	ScheduledArrivalTime   *time.Time //`json:"scharr,omitempty"`
+	ScheduledDepartureTime *time.Time //`json:"schdep,omitempty"`
+	ActualDepartureTime    *time.Time //`json:"actdep,omitempty"`
+	ActualArrivalTime      *time.Time //`json:"actarr,omitempty"`
 }
 
 // UnmarshalJSON convert JSON data to struct
 func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 	t := struct {
-		ScheduledArrival   string `json:"scharr"`
-		ScheduledDeparture string `json:"schdep"`
-		ActualDeparture    string `json:"actdep"`
-		ActualArrival      string `json:"actarr"`
+		ScheduledArrivalTime   string `json:"scharr"`
+		ScheduledDepartureTime string `json:"schdep"`
+		ActualDepartureTime    string `json:"actdep"`
+		ActualArrivalTime      string `json:"actarr"`
 
-		DelayArrival   string `json:"delayarr"`
-		DelayDeparture string `json:"delaydep"`
+		DelayArrivalTime   string `json:"delayarr"`
+		DelayDepartureTime string `json:"delaydep"`
 
 		*Train
 	}{}
@@ -166,52 +165,52 @@ func (r *TrainWithTimings) UnmarshalJSON(data []byte) error {
 
 	r.Train = t.Train
 
-	if len(t.ScheduledArrival) == 5 {
-		sa, err := time.Parse("15:04", t.ScheduledArrival)
+	if len(t.ScheduledArrivalTime) == 5 {
+		sa, err := time.Parse("15:04", t.ScheduledArrivalTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledArrival failed")
 		}
-		r.ScheduledArrival = &sa
+		r.ScheduledArrivalTime = &sa
 	}
 
-	if len(t.ScheduledDeparture) == 5 {
-		sd, err := time.Parse("15:04", t.ScheduledDeparture)
+	if len(t.ScheduledDepartureTime) == 5 {
+		sd, err := time.Parse("15:04", t.ScheduledDepartureTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ScheduledDeparture failed")
 		}
-		r.ScheduledDeparture = &sd
+		r.ScheduledDepartureTime = &sd
 	}
 
-	if len(t.ActualDeparture) == 5 {
-		ad, err := time.Parse("15:04", t.ActualDeparture)
+	if len(t.ActualDepartureTime) == 5 {
+		ad, err := time.Parse("15:04", t.ActualDepartureTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ActualDeparture failed")
 		}
-		r.ActualDeparture = &ad
+		r.ActualDepartureTime = &ad
 	}
 
-	if len(t.ActualArrival) == 5 {
-		aa, err := time.Parse("15:04", t.ActualArrival)
+	if len(t.ActualArrivalTime) == 5 {
+		aa, err := time.Parse("15:04", t.ActualArrivalTime)
 		if err != nil {
 			return errors.Wrap(err, "parse ActualArrival failed")
 		}
-		r.ActualArrival = &aa
+		r.ActualArrivalTime = &aa
 	}
 
-	if len(t.DelayArrival) == 5 {
-		da, err := time.Parse("15:04", t.DelayArrival)
+	if len(t.DelayArrivalTime) == 5 {
+		da, err := time.Parse("15:04", t.DelayArrivalTime)
 		if err != nil {
 			return errors.Wrap(err, "parse DelayArrival failed")
 		}
-		r.DelayArrival = &da
+		r.DelayArrivalTime = &da
 	}
 
-	if len(t.DelayDeparture) == 5 {
-		dd, err := time.Parse("15:04", t.DelayDeparture)
+	if len(t.DelayDepartureTime) == 5 {
+		dd, err := time.Parse("15:04", t.DelayDepartureTime)
 		if err != nil {
 			return errors.Wrap(err, "parse DelayDeparture failed")
 		}
-		r.DelayDeparture = &dd
+		r.DelayDepartureTime = &dd
 	}
 
 	return nil
