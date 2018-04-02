@@ -1,11 +1,22 @@
 # rail
 
-rail is a Go client library for accessing the [RailwayAPI.com API](https://railwayapi.com/api).
+[![GoDoc](https://godoc.org/github.com/go-india/rail?status.svg)](https://godoc.org/github.com/go-india/rail)
+[![Build Status](https://travis-ci.org/go-india/rail.svg?branch=master)](https://travis-ci.org/go-india/rail)
+[![Test Coverage](https://coveralls.io/repos/go-india/rail/badge.svg?branch=master)](https://coveralls.io/r/go-india/rail?branch=master)
+[![Report card](https://goreportcard.com/badge/github.com/go-india/rail)](https://goreportcard.com/report/github.com/go-india/rail)
 
-## Usage
+rail is a [Go](http://golang.org/) client library for accessing the [railwayapi.com API](https://railwayapi.com/api).
 
-Construct a new Rail client, then use the various methods on the client to
-access different parts of the RailwayAPI. For demonstration:
+### Installation
+```bash
+$ go get -u github.com/go-india/rail
+```
+
+### Usage
+
+Construct a new rail client, then use the various methods on the client to access different parts of the RailwayAPI.
+
+For demonstration:
 
 ```go
 package main
@@ -15,24 +26,31 @@ import (
   "github.com/go-india/rail"
 )
 
+var ctx = context.Background()
+
 func main() {
   client := rail.NewClient(API_KEY)
 
   // Gets PNR status details.
-  resp, err := client.PNRStatus(context.Background(), 2124289856)
+  resp, err := client.PNRStatus(ctx, 2124289856)
 
   // Gets Live running status of Train.
-  resp, err := client.LiveTrainStatus(context.Background(), 14311, time.Now())
+  resp, err := client.LiveTrainStatus(ctx, 14311, time.Now())
+
+  // Gets fares of train.
+  resp, err := c.TrainFare(ctx, 14311, "BE", "ADI", 24, "SL", "GN", time.Now())
 }
 ```
 
-`Note`: Using the [context](https://godoc.org/context) package for passing context.  
-For complete usage of rail, see the full [api docs](https://railwayapi.com/api).
+`Notes`
+* Using the [context](https://godoc.org/context) package for passing context.  
+* Make sure you have a valid API Key. If not, you can get a new one by registering at railwayapi.com [registration page](https://railwayapi.com/register).
 
-## Authentication
+For complete usage of rail, see the full [package docs](https://godoc.org/github.com/go-india/rail).
 
-If you are using concrete Client, then you need to assign client.Auth field to
-make the client methods use authenticator for requests.
+#### Authentication
+
+If you are using concrete Client, then you need to assign `client.Auth` field to make the client methods use authenticator for requests.
 
 ```go
 client := rail.Client{
@@ -42,7 +60,7 @@ client := rail.Client{
 
 This will add API Key to each request made by client methods.
 
-## Integration Tests
+#### Integration Tests
 
 You can run integration tests from the directory.
 
@@ -50,11 +68,16 @@ You can run integration tests from the directory.
 $ go test -v
 ```
 
-Use `-update` flag to run tests and update the testdata as well.  
+`Note`: Use `-update` flag to update the testdata. When using update flag, you will need to define `RAILWAYAPI_TEST_API_KEY` in your environment for tests to use the API Key for testing.
 
-`Note`: Define `RAILWAYAPI_TEST_API_KEY` in your environment for tests to use the API Key for testing.
+### Contributing
 
-## License
+We welcome pull requests, bug fixes and issue reports. Before proposing a change, please discuss your change by raising an issue.
 
-This library is distributed under the BSD-style license found in the [LICENSE](./LICENSE)
-file.
+### License
+
+This library is distributed under the MIT license found in the [LICENSE](./LICENSE) file.
+
+### Author
+
+[Yash Raj Singh](http://yashrajsingh.net/)
