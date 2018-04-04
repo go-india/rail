@@ -17,7 +17,7 @@ func TestTrainByNumber(t *testing.T) {
 		t.Fatal("TrainByNumber failed:", err)
 	}
 
-	if len(resp.Train.Classes) < 1 || resp.ResponseCode != 200 {
+	if resp.Train == nil || resp.ResponseCode != 200 {
 		t.Fatal("invalid response")
 	}
 }
@@ -31,7 +31,7 @@ func TestTrainByName(t *testing.T) {
 		t.Fatal("TrainByName failed:", err)
 	}
 
-	if len(resp.Train.Classes) < 1 || resp.ResponseCode != 200 {
+	if resp.Train == nil || resp.ResponseCode != 200 {
 		t.Fatal("invalid response")
 	}
 }

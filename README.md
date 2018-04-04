@@ -1,11 +1,8 @@
-# rail
-
-[![GoDoc](https://godoc.org/github.com/go-india/rail?status.svg)](https://godoc.org/github.com/go-india/rail)
-[![Build Status](https://travis-ci.org/go-india/rail.svg?branch=master)](https://travis-ci.org/go-india/rail)
-[![Coverage Status](https://coveralls.io/repos/github/go-india/rail/badge.svg?branch=master)](https://coveralls.io/github/go-india/rail?branch=master)
-[![Report card](https://goreportcard.com/badge/github.com/go-india/rail)](https://goreportcard.com/report/github.com/go-india/rail)
+# rail [![GoDoc](https://godoc.org/github.com/go-india/rail?status.svg)](https://godoc.org/github.com/go-india/rail) [![Build Status](https://travis-ci.org/go-india/rail.svg?branch=master)](https://travis-ci.org/go-india/rail) [![Coverage Status](https://coveralls.io/repos/github/go-india/rail/badge.svg?branch=master)](https://coveralls.io/github/go-india/rail?branch=master) [![Report card](https://goreportcard.com/badge/github.com/go-india/rail)](https://goreportcard.com/report/github.com/go-india/rail)
 
 rail is a [Go](http://golang.org/) client library for accessing the [railwayapi.com API](https://railwayapi.com/api).
+
+> <img src="https://railwayapi.com/api/images/logo.png" width="196">  
 
 > RailwayAPI.com provides API for Indian Railways data of Trains and Stations, along with features like Train Live status, PNR status, Arrivals on Station, Trains Between Stations etc
 

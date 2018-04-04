@@ -12,7 +12,7 @@ func TestLiveTrainStatus(t *testing.T) {
 	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
-	resp, err := c.LiveTrainStatus(context.Background(), 14311, time.Now())
+	resp, err := c.LiveTrainStatus(context.Background(), 12138, time.Now())
 	if err != nil {
 		t.Fatal("LiveTrainStatus failed:", err)
 	}
@@ -77,7 +77,7 @@ func TestTrainFare(t *testing.T) {
 		t.Fatal("TrainFare failed:", err)
 	}
 
-	if len(resp.Train.Classes) < 1 || resp.ResponseCode != 200 {
+	if resp.Train == nil || resp.ResponseCode != 200 {
 		t.Fatal("invalid response")
 	}
 }

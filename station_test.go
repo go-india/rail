@@ -12,7 +12,8 @@ func TestTrainBetweenStations(t *testing.T) {
 	c := rail.NewClient(getAPIKey())
 	testClient(&c, t)
 
-	resp, err := c.TrainBetweenStations(context.Background(), "BE", "ADI", time.Now())
+	d := time.Date(2018, time.April, 5, 0, 0, 0, 0, time.UTC)
+	resp, err := c.TrainBetweenStations(context.Background(), "BE", "ADI", d)
 	if err != nil {
 		t.Fatal("TrainBetweenStations failed:", err)
 	}
