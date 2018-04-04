@@ -39,7 +39,7 @@ func main() {
   resp, err := client.LiveTrainStatus(ctx, 14311, time.Now())
 
   // Gets fares of train.
-  resp, err := c.TrainFare(ctx, 14311, "BE", "ADI", 24, "SL", "GN", time.Now())
+  resp, err := client.TrainFare(ctx, 14311, "BE", "ADI", 24, "SL", "GN", time.Now())
 }
 ```
 
