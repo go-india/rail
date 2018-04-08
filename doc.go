@@ -5,8 +5,7 @@ You can read the API server documentation at https://railwayapi.com/api
 
 Usage
 
-Construct a new rail client, then use the various methods on the client to
-access different parts of the RailwayAPI.
+Construct a new rail client, then use the various methods on the client to access different parts of the RailwayAPI.
 
 For demonstration:
 
@@ -23,21 +22,24 @@ For demonstration:
     client := rail.NewClient(API_KEY)
 
     // Gets PNR status details.
-    resp, err := client.PNRStatus(ctx, 2124289856)
+    pnr, err := client.PNRStatus(ctx, 2124289856)
 
     // Gets Live running status of Train.
-    resp, err := client.LiveTrainStatus(ctx, 14311, time.Now())
+    live, err := client.LiveTrainStatus(ctx, 14311, time.Now())
 
     // Gets fares of train.
-    resp, err := client.TrainFare(ctx, 14311, "BE", "ADI", 24, "SL", "GN", time.Now())
+    fare, err := client.TrainFare(ctx, 14311, "BE", "ADI", 24, "SL", "GN", time.Now())
   }
 
-NOTE: Using the https://godoc.org/context package for passing context.
+Notes:
+
+* Using the https://godoc.org/context package for passing context.
+
+* Look at tests(*_test.go) files for more sample usage.
 
 Authentication
 
-If you are using concrete Client, then you need to assign client.Auth field to
-make the client methods use authenticator for requests.
+If you are using concrete Client, then you need to assign client.Auth field to make the client methods use authenticator for requests.
 
   client := rail.Client{
     Auth: rail.NewAuth(API_KEY),
